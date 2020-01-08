@@ -1,3 +1,4 @@
-from django.shortcuts import render
+from rest_framework.views import APIView
+from django.http import JsonResponse
+from .models import Account
 
-# Create your views here.
