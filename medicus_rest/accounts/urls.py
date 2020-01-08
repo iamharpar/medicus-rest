@@ -1,11 +1,7 @@
-from django.urls import path, include
-from .serializers import AccountViewSerializer
-from rest_framework import routers
+from .views import AccountModelViewSet
+from rest_framework.routers import DefaultRouter
 
+router = DefaultRouter()
+router.register(r'', AccountModelViewSet)
 
-router = routers.DefaultRouter()
-router.register(r'', AccountViewSerializer)
-
-urlpatterns = [
-    path(r'', include(router.urls)),
-]
+urlpatterns = router.urls
