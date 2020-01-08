@@ -1,6 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import ugettext_lazy as _
-
+from django.db.models import Q
 
 class CustomAccountManager(BaseUserManager):
     use_in_migrations = True
@@ -34,3 +34,6 @@ class CustomAccountManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self._create_user(email, password, **extra_fields)
+    
+    def get_by_natural_key(self, username):
+        return self.get(Q(**{self.model.EMAIL_FIELD:username}))
