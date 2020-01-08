@@ -126,6 +126,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+AUTH_USER_MODEL = 'accounts.Account'
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
