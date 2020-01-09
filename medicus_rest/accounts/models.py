@@ -13,7 +13,6 @@ class Account(AbstractUser):
     organisation = models.CharField(
         _('organisation'),
         max_length=120,
-        default=None
     )
 
     USERNAME_FIELD = 'email'
