@@ -36,7 +36,7 @@ class UserSignupTestCase(TestCase):
             'contact_detail': 'some@email.com'
         }
         response = self.client.post(self.signup_url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_signup_with_correct_fields(self):
         response = self.client.post(self.signup_url, self.data, format='json')
@@ -63,7 +63,7 @@ class UserLoginTestCase(TestCase):
         self.login_url = reverse("login")
         self.data = {
             'email': 'email.email1@gmail.com',
-            'password': 'shititit',
+            'password': 'helloworld123',
             'is_organisation': True,
             'address': 'Some city, state',
             'contact_detail': 'some@email.com'
