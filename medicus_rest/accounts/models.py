@@ -33,3 +33,16 @@ class Organisation(models.Model):
         _('short description of organisation (300 characters)'),
         max_length=300
     )
+
+
+class MedicalStaff(models.Model):
+    user = models.OneToOneField('User', on_delete=models.CASCADE)
+    organisation = models.OneToOneField(
+        'Organisation', on_delete=models.DO_NOTHING
+    )
+    uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
+    role = models.CharField(_('role in organisation'), max_length=30)
+    speciality = models.CharField(
+        _('medical speciality, if any'), max_length=30, blank=True,
+        default='',
+    )
