@@ -81,6 +81,22 @@ class UserSignupTestCase(TestCase):
         )
         self.client.post(self.logout_url)
 
+    def test_cookie_after_signup(self):
+        response = self.client.post(self.signup_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        cookie_dict = response.client.cookies
+        self.assertTrue(cookie_dict['auth_token'])
+
+    def test_cookie_after_logout(self):
+        response = self.client.post(self.signup_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
+        )
+        response = self.client.post(self.logout_url)
+        cookie_header = response.client.cookies['auth_token'].output()
+        self.assertIn("expires=Thu, 01 Jan 1970 00:00:00 GMT;", cookie_header)
+
 
 class UserLoginTestCase(TestCase):
     def setUp(self):
@@ -141,3 +157,10 @@ class UserLoginTestCase(TestCase):
             HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
         )
         self.client.post(self.logout_url)
+
+    def test_cookie_after_login(self):
+        response = self.client.post(
+            self.login_url, self.login_data, format='json'
+        )
+        cookie_dict = response.client.cookies
+        self.assertTrue(cookie_dict['auth_token'])
