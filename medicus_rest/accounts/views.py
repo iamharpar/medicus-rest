@@ -1,3 +1,4 @@
+from djoser.views import TokenCreateView, TokenDestroyView
 from rest_framework import viewsets
 from rest_framework import status
 from .serializers import UserSerializer
@@ -14,3 +15,15 @@ class UserModelViewSet(viewsets.ModelViewSet):
             auth_token = response.data['auth_token']
             response.set_cookie('auth_token', auth_token)
         return response
+
+
+class UserLogin(TokenCreateView):
+
+    def post(self, request, **kwargs):
+        return super().post(request, **kwargs)
+
+
+class UserLogout(TokenDestroyView):
+
+    def post(self, request, **kwargs):
+        return super().post(request, **kwargs)
