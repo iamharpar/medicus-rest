@@ -10,9 +10,8 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('email must be set')
 
         email = self.normalize_email(email)
-        extra_fields.setdefault('designation', 'Under Review')
-        extra_fields.setdefault('organisation', 'Not defined')
-        extra_fields.setdefault('is_employee', False)
+        extra_fields.setdefault('is_organisation', False)
+        extra_fields.setdefault('is_medical_staff', False)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
