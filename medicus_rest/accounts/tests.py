@@ -11,6 +11,7 @@ class UserSignupTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.login_url = reverse("login")
+        self.logout_url = reverse("logout")
         self.signup_url = reverse("user-list")
         self.data = {
             'email': 'email.email1@gmail.com',
@@ -56,6 +57,20 @@ class UserSignupTestCase(TestCase):
         response = self.client.post(self.signup_url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_auth_token_after_signup(self):
+        response = self.client.post(self.signup_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(response.data['auth_token'])
+
+    def test_user_logged_in_after_signup(self):
+        response = self.client.post(self.signup_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = User.objects.get(email=self.data['email'])
+        self.assertTrue(user.is_authenticated and user.is_active)
+
+    def test_logout_user_after_signup(self):
+        pass
+
 
 class UserLoginTestCase(TestCase):
     def setUp(self):
@@ -79,8 +94,7 @@ class UserLoginTestCase(TestCase):
             self.login_url, self.login_data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # compare response keys
-        self.assertEqual(response.data.keys(), {"auth_token": "XXX"}.keys())
+        self.assertTrue(response.data['auth_token'])
 
     def test_login_already_logged_in_user(self):
         # If user is already logged in, the same access token will be

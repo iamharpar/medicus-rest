@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from rest_framework.authtoken.models import Token
 from django.utils.translation import ugettext_lazy as _
 
 from uuid import uuid4
@@ -22,6 +23,10 @@ class User(AbstractUser):
     def __str__(self):
         return self.email
 
+    def get_auth_token(self):
+        token, _ = Token.objects.get_or_create(user=self)
+        return token.key
+
 
 class Organisation(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
@@ -37,10 +42,10 @@ class Organisation(models.Model):
 
 class MedicalStaff(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
+    uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     organisation = models.OneToOneField(
         'Organisation', on_delete=models.DO_NOTHING
     )
-    uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     role = models.CharField(_('role in organisation'), max_length=30)
     speciality = models.CharField(
         _('medical speciality, if any'), max_length=30, blank=True,
