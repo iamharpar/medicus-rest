@@ -1,8 +1,8 @@
+from django.contrib.auth import get_user_model
+from rest_framework.test import APIClient
+from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
-from django.test import TestCase
-from rest_framework.test import APIClient
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
@@ -20,6 +20,9 @@ class UserSignupTestCase(TestCase):
             'address': 'Some city, state',
             'contact_detail': 'some@email.com'
         }
+
+    def get_user(self):
+        return User.objects.get(email=self.data['email'])
 
     def test_signup_with_incorrect_fields(self):
         data = {'title': 'new idea'}
@@ -65,17 +68,25 @@ class UserSignupTestCase(TestCase):
     def test_user_logged_in_after_signup(self):
         response = self.client.post(self.signup_url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        user = User.objects.get(email=self.data['email'])
+        user = self.get_user()
         self.assertTrue(user.is_authenticated and user.is_active)
 
     def test_logout_user_after_signup(self):
-        pass
+        response = self.client.post(self.signup_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
+        )
+        self.client.post(self.logout_url)
+        user = self.get_user()
+        self.assertTrue(user.is_authenticated and user.is_active)
 
 
 class UserLoginTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.login_url = reverse("login")
+        self.logout_url = reverse("logout")
         self.data = {
             'email': 'email.email1@gmail.com',
             'password': 'helloworld123',
@@ -88,6 +99,9 @@ class UserLoginTestCase(TestCase):
             'password': 'helloworld123'
         }
         self.user = User.objects.create_user(**self.data)
+
+    def get_user(self):
+        return User.objects.get(email=self.data['email'])
 
     def test_login_user(self):
         response = self.client.post(
@@ -109,3 +123,21 @@ class UserLoginTestCase(TestCase):
         )
         self.assertEqual(second_response.status_code, status.HTTP_200_OK)
         self.assertDictEqual(first_response.data, second_response.data)
+
+    def test_login_with_wrong_credentials(self):
+        data = {
+            'email': 'email.email1@gmail.com',
+            'password': 'wrong password',
+        }
+        response = self.client.post(self.login_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_logout_user_after_login(self):
+        response = self.client.post(self.login_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
+        )
+        self.client.post(self.logout_url)
+        user = self.get_user()
+        self.assertTrue(user.is_authenticated and user.is_active)
