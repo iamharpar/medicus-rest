@@ -47,6 +47,7 @@ class UserLogout(TokenDestroyView):
 
     def post(self, request, **kwargs):
         response = super().post(request, **kwargs)
-        if response.status_code == status.HTTP_200_OK:
+        # This is expected behaviour
+        if response.status_code == status.HTTP_204_NO_CONTENT:
             response.delete_cookie(key='auth_token')
         return response
