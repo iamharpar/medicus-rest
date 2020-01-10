@@ -45,6 +45,8 @@ class UserSignupTestCase(TestCase):
     def test_signup_with_correct_fields(self):
         response = self.client.post(self.signup_url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = self.get_user()
+        self.assertTrue(user.is_authenticated and user.is_active)
 
     def test_signup_with_already_existing_user(self):
         User.objects.create_user(**self.data)
@@ -79,7 +81,7 @@ class UserSignupTestCase(TestCase):
         )
         self.client.post(self.logout_url)
         user = self.get_user()
-        self.assertTrue(user.is_authenticated and user.is_active)
+        self.assertFalse(user.is_authenticated and user.is_active)
 
 
 class UserLoginTestCase(TestCase):
@@ -109,6 +111,8 @@ class UserLoginTestCase(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data['auth_token'])
+        user = self.get_user()
+        self.assertTrue(user.is_authenticated and user.is_active)
 
     def test_login_already_logged_in_user(self):
         # If user is already logged in, the same access token will be
@@ -140,4 +144,4 @@ class UserLoginTestCase(TestCase):
         )
         self.client.post(self.logout_url)
         user = self.get_user()
-        self.assertTrue(user.is_authenticated and user.is_active)
+        self.assertFalse(user.is_authenticated and user.is_active)
