@@ -127,8 +127,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-AUTH_USER_MODEL = 'accounts.Account'
-
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -136,13 +134,17 @@ REST_FRAMEWORK = {
     ]
 }
 
+# Auth User model & Djsoer
+AUTH_USER_MODEL = 'accounts.User'
+
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
 }
+
 JWT_AUTH = {"JWT_ALLOW_REFRESH": True}
 
 DJOSER = {
     'SERIALIZERS': {
-        'user_create': 'accounts.serializers.AccountSerializer'
+        'user_create': 'accounts.serializers.UserSerializer'
     }
 }

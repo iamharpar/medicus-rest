@@ -2,23 +2,21 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
 
-from .managers import CustomAccountManager
+from .managers import CustomUserManager
 
 
-class Account(AbstractUser):
+class User(AbstractUser):
     username = None  # For using email as username
     email = models.EmailField(_('email address'), unique=True)
-    designation = models.CharField(_('designation'), max_length=70)
-    is_employee = models.BooleanField(default=False)
-    organisation = models.CharField(
-        _('organisation'),
-        max_length=120,
-    )
+    is_medical_staff = models.BooleanField(default=False)
+    is_organisation = models.BooleanField(default=False)
+    contact_details = models.CharField(_('contact details'), max_length=25)
+    address = models.TextField(_('address'))
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
-    objects = CustomAccountManager()
+    objects = CustomUserManager()
 
     def __str__(self):
         return self.email
