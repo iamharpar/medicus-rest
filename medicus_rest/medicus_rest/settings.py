@@ -77,6 +77,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'medicus_rest.wsgi.application'
 
+# CORS settings
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+CORS_ORIGIN_WHITELIST = (
+    "http://localhost:8080",
+)
+
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
