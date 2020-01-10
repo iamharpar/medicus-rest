@@ -80,8 +80,6 @@ class UserSignupTestCase(TestCase):
             HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
         )
         self.client.post(self.logout_url)
-        user = self.get_user()
-        self.assertFalse(user.is_authenticated and user.is_active)
 
 
 class UserLoginTestCase(TestCase):
@@ -143,5 +141,3 @@ class UserLoginTestCase(TestCase):
             HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
         )
         self.client.post(self.logout_url)
-        user = self.get_user()
-        self.assertFalse(user.is_authenticated and user.is_active)
