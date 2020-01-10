@@ -11,7 +11,14 @@ class UserSignupTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.login_url = reverse("login")
-        self.signup_url = reverse("account-list")
+        self.signup_url = reverse("user-list")
+        self.data = {
+            'email': 'email.email1@gmail.com',
+            'password': 'shititit',
+            'is_organisation': True,
+            'address': 'Some city, state',
+            'contact_detail': 'some@email.com'
+        }
 
     def test_signup_with_incorrect_fields(self):
         data = {'title': 'new idea'}
@@ -20,49 +27,33 @@ class UserSignupTestCase(TestCase):
 
     def test_signup_with_optional_fields(self):
         data = {
+            'first_name': 'First Name',
+            'last_name': 'Last Name',
             'email': 'email.email1@gmail.com',
             'password': 'shititit',
-            'designation': 'doctor',
+            'is_organisation': True,
+            'address': 'Some city, state',
+            'contact_detail': 'some@email.com'
         }
         response = self.client.post(self.signup_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_signup_with_correct_fields(self):
-        data = {
-            'email': 'email.email1@gmail.com',
-            'password': 'helloworld123',
-            'designation': 'doctor',
-            'organisation': 'healthz'
-        }
-        response = self.client.post(self.signup_url, data, format='json')
+        response = self.client.post(self.signup_url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_signup_with_already_existing_user(self):
-        data = {
-            'email': 'email.email1@gmail.com',
-            'password': 'helloworld123',
-            'designation': 'doctor',
-            'organisation': 'healthz'
-        }
-
-        User.objects.create_user(**data)
-        response = self.client.post(self.signup_url, data, format='json')
+        User.objects.create_user(**self.data)
+        response = self.client.post(self.signup_url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_signup_already_logged_in_user(self):
-        data = {
-            'email': 'email.email1@gmail.com',
-            'password': 'helloworld123',
-            'designation': 'doctor',
-            'organisation': 'healthz'
-        }
-
-        User.objects.create_user(**data)
+        User.objects.create_user(**self.data)
         is_logged_in = self.client.login(
-            username=data['email'], password=data['password']
+            username=self.data['email'], password=self.data['password']
         )
         self.assertTrue(is_logged_in)
-        response = self.client.post(self.signup_url, data, format='json')
+        response = self.client.post(self.signup_url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
@@ -72,9 +63,10 @@ class UserLoginTestCase(TestCase):
         self.login_url = reverse("login")
         self.data = {
             'email': 'email.email1@gmail.com',
-            'password': 'helloworld123',
-            'designation': 'doctor',
-            'organisation': 'healthz'
+            'password': 'shititit',
+            'is_organisation': True,
+            'address': 'Some city, state',
+            'contact_detail': 'some@email.com'
         }
         self.login_data = {
             'email': 'email.email1@gmail.com',

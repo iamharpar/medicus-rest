@@ -10,7 +10,7 @@ class User(AbstractUser):
     email = models.EmailField(_('email address'), unique=True)
     is_medical_staff = models.BooleanField(default=False)
     is_organisation = models.BooleanField(default=False)
-    contact_details = models.CharField(_('contact details'), max_length=25)
+    contact_detail = models.CharField(_('contact detail'), max_length=25)
     address = models.TextField(_('address'))
 
     USERNAME_FIELD = 'email'
