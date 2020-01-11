@@ -165,13 +165,14 @@ class UserLoginTestCase(TestCase):
         response = self.client.post(self.login_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_logout_user_after_login(self):
+    def test_token_deleted_after_user_logout(self):
         response = self.client.post(self.login_url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.credentials(
             HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
         )
-        self.client.post(self.logout_url)
+        response = self.client.post(self.logout_url)
+        self.assertFalse(Token.objects.filter(user=self.user).exists())
 
     def test_cookie_after_login(self):
         response = self.client.post(
@@ -179,3 +180,69 @@ class UserLoginTestCase(TestCase):
         )
         cookie_dict = response.client.cookies
         self.assertTrue(cookie_dict['auth_token'])
+
+
+class UserCheckLoginTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.login_url = reverse('login')
+        self.logout_url = reverse('logout')
+        self.signup_url = reverse('user-list')
+        self.check_url = reverse('check_login')
+        self.login_data = {
+            'email': 'email.email1@gmail.com',
+            'password': 'shititit',
+        }
+        self.data = {
+            'email': 'email.email1@gmail.com',
+            'password': 'shititit',
+            'user_type': 'OR',
+            'address': 'Some city, state',
+            'contact_detail': 'some@email.com'
+        }
+        self.check_data = {
+            'auth_token': '',
+        }
+
+    def signup_user(self):
+        return self.client.post(self.signup_url, self.data, format='json')
+
+    def login_user(self, create_user=False):
+        if create_user:
+            User.objects.create_user(**self.data)
+        return self.client.post(self.login_url, self.data, format='json')
+
+    def logout_user(self, auth_token):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Token ' + auth_token
+        )
+        return self.client.post(self.logout_url)
+
+    def test_check_user_after_login(self):
+        response = self.login_user(create_user=True)
+        self.check_data['auth_token'] = response.data['auth_token']
+        response = self.client.post(
+            self.check_url, self.check_data, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data['logged_in'])
+
+    def test_check_user_after_signup(self):
+        response = self.signup_user()
+        self.check_data['auth_token'] = response.data['auth_token']
+        response = self.client.post(
+            self.check_url, self.check_data, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data['logged_in'])
+
+    def test_check_user_after_logout(self):
+        response = self.login_user(create_user=True)
+        auth_token = response.data['auth_token']
+        self.check_data['auth_token'] = auth_token
+        self.logout_user(auth_token=auth_token)
+        response = self.client.post(
+            self.check_url, self.check_data, format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
