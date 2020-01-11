@@ -74,29 +74,11 @@ class UserSignupTestCase(TestCase):
         user = self.get_user()
         self.assertTrue(user.is_authenticated and user.is_active)
 
-    def test_logout_user_after_signup(self):
-        response = self.client.post(self.signup_url, self.data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.client.credentials(
-            HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
-        )
-        self.client.post(self.logout_url)
-
     def test_cookie_after_signup(self):
         response = self.client.post(self.signup_url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         cookie_dict = response.client.cookies
         self.assertTrue(cookie_dict['auth_token'])
-
-    def test_cookie_after_logout(self):
-        response = self.client.post(self.signup_url, self.data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.client.credentials(
-            HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
-        )
-        response = self.client.post(self.logout_url)
-        cookie_header = response.client.cookies['auth_token'].output()
-        self.assertIn("expires=Thu, 01 Jan 1970 00:00:00 GMT;", cookie_header)
 
     def test_token_not_created_on_invalid_signup(self):
         data = {
@@ -165,21 +147,62 @@ class UserLoginTestCase(TestCase):
         response = self.client.post(self.login_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_token_deleted_after_user_logout(self):
-        response = self.client.post(self.login_url, self.data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.client.credentials(
-            HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
-        )
-        response = self.client.post(self.logout_url)
-        self.assertFalse(Token.objects.filter(user=self.user).exists())
-
     def test_cookie_after_login(self):
         response = self.client.post(
             self.login_url, self.login_data, format='json'
         )
         cookie_dict = response.client.cookies
         self.assertTrue(cookie_dict['auth_token'])
+
+
+class UserLogoutTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.signup_url = reverse("user-list")
+        self.login_url = reverse("login")
+        self.logout_url = reverse("logout")
+        self.data = {
+            'email': 'email.email1@gmail.com',
+            'password': 'helloworld123',
+            'user_type': 'OR',
+            'address': 'Some city, state',
+            'contact_detail': 'some@email.com'
+        }
+        self.login_data = {
+            'email': 'email.email1@gmail.com',
+            'password': 'helloworld123'
+        }
+
+    def create_user(self):
+        return User.objects.create_user(**self.data)
+
+    def test_logout_user_after_signup(self):
+        response = self.client.post(self.signup_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
+        )
+        self.client.post(self.logout_url)
+
+    def test_token_deleted_after_user_logout(self):
+        user = self.create_user()
+        response = self.client.post(self.login_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
+        )
+        response = self.client.post(self.logout_url)
+        self.assertFalse(Token.objects.filter(user=user).exists())
+
+    def test_cookie_after_logout(self):
+        response = self.client.post(self.signup_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
+        )
+        response = self.client.post(self.logout_url)
+        cookie_header = response.client.cookies['auth_token'].output()
+        self.assertIn("expires=Thu, 01 Jan 1970 00:00:00 GMT;", cookie_header)
 
 
 class UserCheckLoginTestCase(TestCase):
