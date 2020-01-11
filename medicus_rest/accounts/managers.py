@@ -1,7 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.db.models import Q
 from django.db import models
-from uuid import uuid4
 
 
 class CustomUserManager(BaseUserManager):
@@ -49,9 +48,11 @@ class OrganisationManager(models.Manager):
     def create_organisation(self, user, **extra_fields):
         return self._update_or_create(user, **extra_fields)
 
+
 class MedicalStaffManager(models.Manager):
     def _update_or_create(self, user, organisation, **extra_fields):
-        medicalStaff = self.model(user=user, organisation=organisation, **extra_fields)
+        medicalStaff = self.model(
+            user=user, organisation=organisation, **extra_fields)
         medicalStaff.save()
         return medicalStaff
 
