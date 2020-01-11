@@ -46,6 +46,7 @@ class User(AbstractUser):
 
 class Organisation(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
+    organisation_name = models.CharField(_('Name of organisation'),default='Non-descript', max_length=50)
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     description = models.TextField(
         _('proper description of organisation'),
@@ -76,5 +77,5 @@ class MedicalStaff(models.Model):
 
     def __str__(self):
         return "< ({}) Medical Staff {} of {}>".format(
-            self.id, self.user.email, self.organisation.first_name
+            self.id, self.user.email, self.organisation.organisation_name
         )
