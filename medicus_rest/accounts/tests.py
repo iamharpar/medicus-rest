@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
+from rest_framework.authtoken.models import Token
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
@@ -96,6 +97,20 @@ class UserSignupTestCase(TestCase):
         response = self.client.post(self.logout_url)
         cookie_header = response.client.cookies['auth_token'].output()
         self.assertIn("expires=Thu, 01 Jan 1970 00:00:00 GMT;", cookie_header)
+
+    def test_token_not_created_on_invalid_signup(self):
+        data = {
+            'first_name': 'First Name',
+            'last_name': 'Last Name',
+            'email': 'email.email1@gmail.com',
+            'password': 'shititit',
+            'user_type': 'MS',
+            'contact_detail': 'some@email.com'
+        }
+        response = self.client.post(self.signup_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        token = Token.objects.filter(user__email=data['email'])
+        self.assertFalse(len(token))
 
 
 class UserLoginTestCase(TestCase):
