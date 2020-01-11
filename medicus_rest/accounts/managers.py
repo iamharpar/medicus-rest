@@ -42,7 +42,7 @@ class CustomUserManager(BaseUserManager):
             setattr(user, 'address', address)
             user.save(using=self._db)
             return user
-        raise ObjectDoesNotExist
+        raise ObjectDoesNotExist('user does not exist')
 
     def get_by_natural_key(self, username):
         return self.get(Q(**{self.model.EMAIL_FIELD: username}))
@@ -59,7 +59,7 @@ class OrganizationManager(models.Manager):
         if organization:
             organization.update(**extra_fields)
             return organization
-        raise ObjectDoesNotExist
+        raise ObjectDoesNotExist('organization does not exist')
 
     def update_organization(self, user, **extra_fields):
         return self._update_organization(user, **extra_fields)
@@ -80,7 +80,7 @@ class MedicalStaffManager(models.Manager):
         if medical_staff:
             medical_staff.update(**extra_fields)
             return medical_staff
-        raise ObjectDoesNotExist
+        raise ObjectDoesNotExist("given staff object doesn't exist")
 
     def update_medicalstaff(self, user, **extra_fields):
         return self._update_medicalstaff(user, **extra_fields)
@@ -92,17 +92,7 @@ class MedicalStaffManager(models.Manager):
             setattr(medical_staff, 'organization', org)
             medical_staff.save(using=self._db)
             return medical_staff
-        raise ObjectDoesNotExist
+        raise ObjectDoesNotExist("given staff object doesn't exist")
 
     def create_medicalstaff(self, user, org, **extra_fields):
         return self._create_medicalstaff(user, org, **extra_fields)
-
-
-class AddressManager(models.Manager):
-    def _create_address(self, **extra_fields):
-        organization_address = self.model(**extra_fields)
-        organization_address.save(using=self._db)
-        return organization_address
-
-    def create_address(self, **extra_fields):
-        return self._create_address(**extra_fields)

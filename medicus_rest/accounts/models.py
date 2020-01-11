@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from uuid import uuid4
 from .managers import (
     CustomUserManager, OrganizationManager,
-    MedicalStaffManager, AddressManager
+    MedicalStaffManager
 )
 
 
@@ -15,7 +15,7 @@ class User(AbstractUser):
     email = models.EmailField(_('email address'), unique=True)
     contact_detail = models.CharField(_('contact detail'), max_length=25)
     address = models.OneToOneField(
-        'Address', on_delete=models.CASCADE)
+        'Address', on_delete=models.DO_NOTHING)
 
     class UserType(models.TextChoices):
         MEDICAL_STAFF = 'MS', _('MS')
@@ -54,8 +54,6 @@ class Address(models.Model):
     state = models.CharField(_('State name'), max_length=50)
     country = models.CharField(_('Country name'), max_length=50, default='US')
     pincode = models.CharField(_('pincode'), max_length=10)
-
-    objects = AddressManager()
 
     def __str__(self):
         return "<({}) Address {}, {} - {}, {}, {}.".format(
