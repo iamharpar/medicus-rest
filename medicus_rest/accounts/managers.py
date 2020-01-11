@@ -1,6 +1,7 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.db.models import Q
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class CustomUserManager(BaseUserManager):
@@ -40,21 +41,53 @@ class CustomUserManager(BaseUserManager):
 
 
 class OrganisationManager(models.Manager):
-    def _update_or_create(self, user, **extra_fields):
+    def _create_organisation(self, user, **extra_fields):
         organisation = self.model(user=user, **extra_fields)
         organisation.save()
         return organisation
 
+    def _update_organisation(self, user, **extra_fields):
+        if super().filter(user=user):
+            organisation = super().filter(user=user)
+            # print(dir(organisation))
+            organisation.update(**extra_fields)
+            return organisation
+        else:
+            raise ObjectDoesNotExist
+
+    def update_organisation(self, user, **extra_fields):
+        return self._update_organisation(user, **extra_fields)
+
     def create_organisation(self, user, **extra_fields):
-        return self._update_or_create(user, **extra_fields)
+        return self._create_organisation(user, **extra_fields)
 
 
 class MedicalStaffManager(models.Manager):
-    def _update_or_create(self, user, organisation, **extra_fields):
+    def _create_medicalstaff(self, user, organisation, **extra_fields):
         medicalStaff = self.model(
             user=user, organisation=organisation, **extra_fields)
-        medicalStaff.save()
+        medicalStaff.save(using=self._db)
         return medicalStaff
 
+    def _update_medicalstaff(self, user, **extra_fields):
+        if super().filter(user=user):
+            medStaff = super().filter(user=user)
+            medStaff.update(**extra_fields)
+            return medStaff
+        else:
+            raise ObjectDoesNotExist
+
+    def update_medicalstaff(self, user, **extra_fields):
+        return self._update_medicalstaff(user, **extra_fields)
+
+    def update_staff_organisation(self, user, org):
+        if super().filter(user=user):
+            medStaff = super().filter(user=user)
+            medStaff = medStaff.get(user=user)
+            setattr(medStaff, 'organisation', org)
+            medStaff.save(using=self._db)
+            return medStaff
+        raise ObjectDoesNotExist
+
     def create_medicalstaff(self, user, organisation, **extra_fields):
-        return self._update_or_create(user, organisation, **extra_fields)
+        return self._create_medicalstaff(user, organisation, **extra_fields)

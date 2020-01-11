@@ -36,6 +36,7 @@ class Organisation(models.Model):
 
     objects = OrganisationManager()
 
+
 class MedicalStaff(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
     organisation = models.OneToOneField(
@@ -47,5 +48,4 @@ class MedicalStaff(models.Model):
         _('medical speciality, if any'), max_length=30, blank=True,
         default='',
     )
-
     objects = MedicalStaffManager()
