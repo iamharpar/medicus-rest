@@ -47,13 +47,11 @@ class OrganisationManager(models.Manager):
         return organisation
 
     def _update_organisation(self, user, **extra_fields):
-        if super().filter(user=user):
-            organisation = super().filter(user=user)
-            # print(dir(organisation))
+        organisation = super().filter(user=user)
+        if organisation:
             organisation.update(**extra_fields)
             return organisation
-        else:
-            raise ObjectDoesNotExist
+        raise ObjectDoesNotExist
 
     def update_organisation(self, user, **extra_fields):
         return self._update_organisation(user, **extra_fields)
@@ -63,31 +61,30 @@ class OrganisationManager(models.Manager):
 
 
 class MedicalStaffManager(models.Manager):
-    def _create_medicalstaff(self, user, organisation, **extra_fields):
-        medicalStaff = self.model(
-            user=user, organisation=organisation, **extra_fields)
-        medicalStaff.save(using=self._db)
-        return medicalStaff
+    def _create_medicalstaff(self, user, org, **extra_fields):
+        medical_staff = self.model(
+            user=user, organisation=org, **extra_fields)
+        medical_staff.save(using=self._db)
+        return medical_staff
 
     def _update_medicalstaff(self, user, **extra_fields):
-        if super().filter(user=user):
-            medStaff = super().filter(user=user)
-            medStaff.update(**extra_fields)
-            return medStaff
-        else:
-            raise ObjectDoesNotExist
+        medical_staff = super().filter(user=user)
+        if medical_staff:
+            medical_staff.update(**extra_fields)
+            return medical_staff
+        raise ObjectDoesNotExist
 
     def update_medicalstaff(self, user, **extra_fields):
         return self._update_medicalstaff(user, **extra_fields)
 
     def update_staff_organisation(self, user, org):
-        if super().filter(user=user):
-            medStaff = super().filter(user=user)
-            medStaff = medStaff.get(user=user)
-            setattr(medStaff, 'organisation', org)
-            medStaff.save(using=self._db)
-            return medStaff
+        medical_staff = super().filter(user=user)
+        if medical_staff:
+            medical_staff = medical_staff.get(user=user)
+            setattr(medical_staff, 'organisation', org)
+            medical_staff.save(using=self._db)
+            return medical_staff
         raise ObjectDoesNotExist
 
-    def create_medicalstaff(self, user, organisation, **extra_fields):
-        return self._create_medicalstaff(user, organisation, **extra_fields)
+    def create_medicalstaff(self, user, org, **extra_fields):
+        return self._create_medicalstaff(user, org, **extra_fields)
