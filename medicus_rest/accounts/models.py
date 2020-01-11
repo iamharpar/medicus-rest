@@ -4,7 +4,7 @@ from rest_framework.authtoken.models import Token
 from django.utils.translation import ugettext_lazy as _
 
 from uuid import uuid4
-from .managers import CustomUserManager
+from .managers import CustomUserManager, OrganisationManager, MedicalStaffManager
 
 
 class User(AbstractUser):
@@ -46,6 +46,7 @@ class User(AbstractUser):
 
 class Organisation(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
+    organisation_name = models.CharField(_('Name of organisation'),default='Non-descript', max_length=50)
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     description = models.TextField(
         _('proper description of organisation'),
@@ -55,9 +56,10 @@ class Organisation(models.Model):
         max_length=300
     )
 
+    objects = OrganisationManager()
+
     def __str__(self):
         return "< ({}) Organisation's {}>".format(self.id, self.user.email)
-
 
 class MedicalStaff(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
@@ -70,8 +72,10 @@ class MedicalStaff(models.Model):
         _('medical speciality, if any'), max_length=30, blank=True,
         default='',
     )
+    
+    objects = MedicalStaffManager()
 
     def __str__(self):
         return "< ({}) Medical Staff {} of {}>".format(
-            self.id, self.user.email, self.organisation.first_name
+            self.id, self.user.email, self.organisation.organisation_name
         )
