@@ -1,8 +1,9 @@
+from django.contrib.auth import get_user_model
+from rest_framework.test import APIClient
+from rest_framework.authtoken.models import Token
+from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
-from django.test import TestCase
-from rest_framework.test import APIClient
-from django.contrib.auth import get_user_model
 
 
 User = get_user_model()
@@ -12,14 +13,18 @@ class UserSignupTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.login_url = reverse("login")
+        self.logout_url = reverse("logout")
         self.signup_url = reverse("user-list")
         self.data = {
             'email': 'email.email1@gmail.com',
             'password': 'shititit',
-            'is_organisation': True,
+            'user_type': 'OR',
             'address': 'Some city, state',
             'contact_detail': 'some@email.com'
         }
+
+    def get_user(self):
+        return User.objects.get(email=self.data['email'])
 
     def test_signup_with_incorrect_fields(self):
         data = {'title': 'new idea'}
@@ -32,7 +37,7 @@ class UserSignupTestCase(TestCase):
             'last_name': 'Last Name',
             'email': 'email.email1@gmail.com',
             'password': 'shititit',
-            'is_organisation': True,
+            'user_type': 'MS',
             'address': 'Some city, state',
             'contact_detail': 'some@email.com'
         }
@@ -42,6 +47,8 @@ class UserSignupTestCase(TestCase):
     def test_signup_with_correct_fields(self):
         response = self.client.post(self.signup_url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = self.get_user()
+        self.assertTrue(user.is_authenticated and user.is_active)
 
     def test_signup_with_already_existing_user(self):
         User.objects.create_user(**self.data)
@@ -57,15 +64,47 @@ class UserSignupTestCase(TestCase):
         response = self.client.post(self.signup_url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_auth_token_after_signup(self):
+        response = self.client.post(self.signup_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(response.data['auth_token'])
+
+    def test_user_logged_in_after_signup(self):
+        response = self.client.post(self.signup_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = self.get_user()
+        self.assertTrue(user.is_authenticated and user.is_active)
+
+    def test_cookie_after_signup(self):
+        response = self.client.post(self.signup_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        cookie_dict = response.client.cookies
+        self.assertTrue(cookie_dict['auth_token'])
+
+    def test_token_not_created_on_invalid_signup(self):
+        data = {
+            'first_name': 'First Name',
+            'last_name': 'Last Name',
+            'email': 'email.email1@gmail.com',
+            'password': 'shititit',
+            'user_type': 'MS',
+            'contact_detail': 'some@email.com'
+        }
+        response = self.client.post(self.signup_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        token = Token.objects.filter(user__email=data['email'])
+        self.assertFalse(len(token))
+
 
 class UserLoginTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.login_url = reverse("login")
+        self.logout_url = reverse("logout")
         self.data = {
             'email': 'email.email1@gmail.com',
             'password': 'helloworld123',
-            'is_organisation': True,
+            'user_type': 'OR',
             'address': 'Some city, state',
             'contact_detail': 'some@email.com'
         }
@@ -75,13 +114,17 @@ class UserLoginTestCase(TestCase):
         }
         self.user = User.objects.create_user(**self.data)
 
+    def get_user(self):
+        return User.objects.get(email=self.data['email'])
+
     def test_login_user(self):
         response = self.client.post(
             self.login_url, self.login_data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # compare response keys
-        self.assertEqual(response.data.keys(), {"auth_token": "XXX"}.keys())
+        self.assertTrue(response.data['auth_token'])
+        user = self.get_user()
+        self.assertTrue(user.is_authenticated and user.is_active)
 
     def test_login_already_logged_in_user(self):
         # If user is already logged in, the same access token will be
@@ -96,3 +139,135 @@ class UserLoginTestCase(TestCase):
         )
         self.assertEqual(second_response.status_code, status.HTTP_200_OK)
         self.assertDictEqual(first_response.data, second_response.data)
+
+    def test_login_with_wrong_credentials(self):
+        data = {
+            'email': 'email.email1@gmail.com',
+            'password': 'wrong password',
+        }
+        response = self.client.post(self.login_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cookie_after_login(self):
+        response = self.client.post(
+            self.login_url, self.login_data, format='json'
+        )
+        cookie_dict = response.client.cookies
+        self.assertTrue(cookie_dict['auth_token'])
+
+
+class UserLogoutTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.signup_url = reverse("user-list")
+        self.login_url = reverse("login")
+        self.logout_url = reverse("logout")
+        self.data = {
+            'email': 'email.email1@gmail.com',
+            'password': 'helloworld123',
+            'user_type': 'OR',
+            'address': 'Some city, state',
+            'contact_detail': 'some@email.com'
+        }
+        self.login_data = {
+            'email': 'email.email1@gmail.com',
+            'password': 'helloworld123'
+        }
+
+    def create_user(self):
+        return User.objects.create_user(**self.data)
+
+    def test_logout_user_after_signup(self):
+        response = self.client.post(self.signup_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
+        )
+        response = self.client.post(self.logout_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_token_deleted_after_user_logout(self):
+        user = self.create_user()
+        response = self.client.post(self.login_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
+        )
+        response = self.client.post(self.logout_url)
+        self.assertFalse(Token.objects.filter(user=user).exists())
+
+    def test_cookie_after_logout(self):
+        response = self.client.post(self.signup_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
+        )
+        response = self.client.post(self.logout_url)
+        cookie_header = response.client.cookies['auth_token'].output()
+        self.assertIn("expires=Thu, 01 Jan 1970 00:00:00 GMT;", cookie_header)
+
+
+class UserCheckLoginTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.login_url = reverse('login')
+        self.logout_url = reverse('logout')
+        self.signup_url = reverse('user-list')
+        self.check_url = reverse('check_login')
+        self.login_data = {
+            'email': 'email.email1@gmail.com',
+            'password': 'shititit',
+        }
+        self.data = {
+            'email': 'email.email1@gmail.com',
+            'password': 'shititit',
+            'user_type': 'OR',
+            'address': 'Some city, state',
+            'contact_detail': 'some@email.com'
+        }
+        self.check_data = {
+            'auth_token': '',
+        }
+
+    def signup_user(self):
+        return self.client.post(self.signup_url, self.data, format='json')
+
+    def login_user(self, create_user=False):
+        if create_user:
+            User.objects.create_user(**self.data)
+        return self.client.post(self.login_url, self.data, format='json')
+
+    def logout_user(self, auth_token):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Token ' + auth_token
+        )
+        return self.client.post(self.logout_url)
+
+    def test_check_user_after_login(self):
+        response = self.login_user(create_user=True)
+        self.check_data['auth_token'] = response.data['auth_token']
+        response = self.client.post(
+            self.check_url, self.check_data, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data['logged_in'])
+
+    def test_check_user_after_signup(self):
+        response = self.signup_user()
+        self.check_data['auth_token'] = response.data['auth_token']
+        response = self.client.post(
+            self.check_url, self.check_data, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data['logged_in'])
+
+    def test_check_user_after_logout(self):
+        response = self.login_user(create_user=True)
+        auth_token = response.data['auth_token']
+        self.check_data['auth_token'] = auth_token
+        self.logout_user(auth_token=auth_token)
+        response = self.client.post(
+            self.check_url, self.check_data, format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

@@ -16,10 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from accounts import views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('auth/', include('djoser.urls.base')),
-    path('auth/', include('djoser.urls.authtoken')),
-    path('auth/', include('djoser.urls.jwt')),
+    path('auth/', include('accounts.urls')),
+    path('auth-login/', views.UserLogin.as_view(), name='login'),
+    path('auth-logout/', views.UserLogout.as_view(), name='logout'),
+    path('auth-check/', views.check_user_logged_in, name='check_login'),
 ]
