@@ -46,7 +46,6 @@ class User(AbstractUser):
 
 class Organisation(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
-    organisation_name = models.CharField(_('Name of organisation'),default='Non-descript', max_length=50)
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     description = models.TextField(
         _('proper description of organisation'),
@@ -61,6 +60,7 @@ class Organisation(models.Model):
     def __str__(self):
         return "< ({}) Organisation's {}>".format(self.id, self.user.email)
 
+
 class MedicalStaff(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
@@ -72,7 +72,7 @@ class MedicalStaff(models.Model):
         _('medical speciality, if any'), max_length=30, blank=True,
         default='',
     )
-    
+
     objects = MedicalStaffManager()
 
     def __str__(self):
