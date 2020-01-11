@@ -30,11 +30,18 @@ class User(AbstractUser):
     objects = CustomUserManager()
 
     def __str__(self):
-        return self.email
+        return "< ({}) User ({}) >".format(self.id, self.email)
 
     def get_auth_token(self):
         token, _ = Token.objects.get_or_create(user=self)
         return token.key
+
+    def get_complete_user_type(self):
+        if self.user_type == 'MS':
+            return "Medical Staff"
+
+        if self.user_type == 'OR':
+            return "Organisation"
 
 
 class Organisation(models.Model):
@@ -48,6 +55,9 @@ class Organisation(models.Model):
         max_length=300
     )
 
+    def __str__(self):
+        return "< ({}) Organisation's {}>".format(self.id, self.user.email)
+
 
 class MedicalStaff(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
@@ -60,3 +70,8 @@ class MedicalStaff(models.Model):
         _('medical speciality, if any'), max_length=30, blank=True,
         default='',
     )
+
+    def __str__(self):
+        return "< ({}) Medical Staff {} of {}>".format(
+            self.id, self.user.email, self.organisation.first_name
+        )
