@@ -7,24 +7,24 @@ from django.core.exceptions import ObjectDoesNotExist
 class CustomUserManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(self, email, password, **extra_fields):
+    def _create_user(self, email, password, address, **extra_fields):
         if not email:
             raise ValueError('email must be set')
 
         email = self.normalize_email(email)
         extra_fields.setdefault('user_type', None)
-        user = self.model(email=email, **extra_fields)
+        user = self.model(email=email, address=address, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password, **extra_fields):
+    def create_user(self, email, password, address, **extra_fields):
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
 
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(email, password, address, **extra_fields)
 
-    def create_superuser(self, email, password, **extra_fields):
+    def create_superuser(self, email, password, address, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
@@ -33,15 +33,24 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(email, password, address, **extra_fields)
+
+    def update_user_address(self, email, address):
+        user = super().filter(email)
+        if user:
+            user = user.get(email=email)
+            setattr(user, 'address', address)
+            user.save(using=self._db)
+            return user
+        raise ObjectDoesNotExist
 
     def get_by_natural_key(self, username):
         return self.get(Q(**{self.model.EMAIL_FIELD: username}))
 
 
 class OrganizationManager(models.Manager):
-    def _create_organization(self, user, address, **extra_fields):
-        organization = self.model(user=user, address=address, **extra_fields)
+    def _create_organization(self, user, **extra_fields):
+        organization = self.model(user=user, **extra_fields)
         organization.save()
         return organization
 
@@ -55,17 +64,8 @@ class OrganizationManager(models.Manager):
     def update_organization(self, user, **extra_fields):
         return self._update_organization(user, **extra_fields)
 
-    def update_organization_address(self, user, address):
-        organization = super().filter(user=user)
-        if organization:
-            organization = organization.get(user=user)
-            setattr(organization, 'address', address)
-            organization.save(using=self._db)
-            return organization
-        raise ObjectDoesNotExist
-
-    def create_organization(self, user, address, **extra_fields):
-        return self._create_organization(user, address, **extra_fields)
+    def create_organization(self, user, **extra_fields):
+        return self._create_organization(user, **extra_fields)
 
 
 class MedicalStaffManager(models.Manager):
@@ -98,11 +98,11 @@ class MedicalStaffManager(models.Manager):
         return self._create_medicalstaff(user, org, **extra_fields)
 
 
-class OrganizationAddressManager(models.Manager):
-    def _create_organization_address(self, **extra_fields):
+class AddressManager(models.Manager):
+    def _create_address(self, **extra_fields):
         organization_address = self.model(**extra_fields)
         organization_address.save(using=self._db)
         return organization_address
 
-    def create_organization_address(self, **extra_fields):
-        return self._create_organization_address(**extra_fields)
+    def create_address(self, **extra_fields):
+        return self._create_address(**extra_fields)

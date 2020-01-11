@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from uuid import uuid4
 from .managers import (
     CustomUserManager, OrganizationManager,
-    MedicalStaffManager, OrganizationAddressManager
+    MedicalStaffManager, AddressManager
 )
 
 
@@ -14,7 +14,8 @@ class User(AbstractUser):
     username = None  # For using email as username
     email = models.EmailField(_('email address'), unique=True)
     contact_detail = models.CharField(_('contact detail'), max_length=25)
-    address = models.TextField(_('address'))
+    address = models.OneToOneField(
+        'Address', on_delete=models.CASCADE)
 
     class UserType(models.TextChoices):
         MEDICAL_STAFF = 'MS', _('MS')
@@ -47,14 +48,14 @@ class User(AbstractUser):
             return "organization"
 
 
-class OrganizationAddress(models.Model):
+class Address(models.Model):
     street = models.CharField(_('street name'), max_length=60)
     city = models.CharField(_('City name'), max_length=50)
     state = models.CharField(_('State name'), max_length=50)
     country = models.CharField(_('Country name'), max_length=50, default='US')
     pincode = models.CharField(_('pincode'), max_length=10)
 
-    objects = OrganizationAddressManager()
+    objects = AddressManager()
 
     def __str__(self):
         return "<({}) Address {}, {} - {}, {}, {}.".format(
@@ -64,9 +65,6 @@ class OrganizationAddress(models.Model):
 
 class Organization(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
-    address = models.OneToOneField(
-        'OrganizationAddress', default='not provided',
-        on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     description = models.TextField(
         _('proper description of organization'),
