@@ -5,7 +5,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from uuid import uuid4
 from .managers import (
-    CustomUserManager, OrganizationManager, MedicalStaffManager,
+    CustomUserManager, OrganizationManager,
+    MedicalStaffManager, OrganizationAddressManager
 )
 
 
@@ -46,15 +47,29 @@ class User(AbstractUser):
             return "organization"
 
 
+class OrganizationAddress(models.Model):
+    street = models.CharField(_('street name'), max_length=60)
+    city = models.CharField(_('City name'), max_length=50)
+    state = models.CharField(_('State name'), max_length=50)
+    country = models.CharField(_('Country name'), max_length=50, default='US')
+    pincode = models.CharField(_('pincode'), max_length=10)
+
+    objects = OrganizationAddressManager()
+
+    def __str__(self):
+        return "<({}) Address {}, {} - {}, {}, {}.".format(
+            self.id, self.street, self.city, self.pincode,
+            self.state, self.country)
+
+
 class Organization(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
+    address = models.OneToOneField(
+        'OrganizationAddress', default='not provided',
+        on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     description = models.TextField(
         _('proper description of organization'),
-    )
-    short_description = models.CharField(
-        _('short description of organization (300 characters)'),
-        max_length=300
     )
 
     objects = OrganizationManager()

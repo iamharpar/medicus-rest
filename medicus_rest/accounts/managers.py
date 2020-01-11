@@ -40,8 +40,8 @@ class CustomUserManager(BaseUserManager):
 
 
 class OrganizationManager(models.Manager):
-    def _create_organization(self, user, **extra_fields):
-        organization = self.model(user=user, **extra_fields)
+    def _create_organization(self, user, address, **extra_fields):
+        organization = self.model(user=user, address=address, **extra_fields)
         organization.save()
         return organization
 
@@ -55,8 +55,17 @@ class OrganizationManager(models.Manager):
     def update_organization(self, user, **extra_fields):
         return self._update_organization(user, **extra_fields)
 
-    def create_organization(self, user, **extra_fields):
-        return self._create_organization(user, **extra_fields)
+    def update_organization_address(self, user, address):
+        organization = super().filter(user=user)
+        if organization:
+            organization = organization.get(user=user)
+            setattr(organization, 'address', address)
+            organization.save(using=self._db)
+            return organization
+        raise ObjectDoesNotExist
+
+    def create_organization(self, user, address, **extra_fields):
+        return self._create_organization(user, address, **extra_fields)
 
 
 class MedicalStaffManager(models.Manager):
@@ -87,3 +96,13 @@ class MedicalStaffManager(models.Manager):
 
     def create_medicalstaff(self, user, org, **extra_fields):
         return self._create_medicalstaff(user, org, **extra_fields)
+
+
+class OrganizationAddressManager(models.Manager):
+    def _create_organization_address(self, **extra_fields):
+        organization_address = self.model(**extra_fields)
+        organization_address.save(using=self._db)
+        return organization_address
+
+    def create_organization_address(self, **extra_fields):
+        return self._create_organization_address(**extra_fields)
