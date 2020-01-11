@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 
+
 User = get_user_model()
 
 
