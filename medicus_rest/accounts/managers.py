@@ -42,10 +42,6 @@ class CustomUserManager(BaseUserManager):
 
 class OrganisationManager(models.Manager):
     def _update_or_create(self, user, **extra_fields):
-        extra_fields.setdefault('description', 'No description')
-        extra_fields.setdefault('short_description', 'No short_description')
-        extra_fields.setdefault('uuid', uuid4())
-
         organisation = self.model(user=user, **extra_fields)
         organisation.save()
         return organisation
@@ -55,10 +51,6 @@ class OrganisationManager(models.Manager):
 
 class MedicalStaffManager(models.Manager):
     def _update_or_create(self, user, organisation, **extra_fields):
-        extra_fields.setdefault('uuid', uuid4())
-        extra_fields.setdefault('role', 'no role assigned')
-        extra_fields.setdefault('speciality','')
-        
         medicalStaff = self.model(user=user, organisation=organisation, **extra_fields)
         medicalStaff.save()
         return medicalStaff
