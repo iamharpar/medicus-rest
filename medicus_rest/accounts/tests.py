@@ -182,7 +182,8 @@ class UserLogoutTest(TestCase):
         self.client.credentials(
             HTTP_AUTHORIZATION='Token ' + response.data['auth_token']
         )
-        self.client.post(self.logout_url)
+        response = self.client.post(self.logout_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_token_deleted_after_user_logout(self):
         user = self.create_user()
