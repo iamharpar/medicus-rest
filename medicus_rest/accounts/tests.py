@@ -154,6 +154,17 @@ class UserLoginTestCase(TestCase):
         cookie_dict = response.client.cookies
         self.assertTrue(cookie_dict['auth_token'])
 
+    def test_auth_token_from_two_logins(self):
+        response = self.client.post(
+            self.login_url, self.login_data, format='json'
+        )
+        first_auth_token = response.data['auth_token']
+        response = self.client.post(
+            self.login_url, self.login_data, format='json'
+        )
+        second_auth_token = response.data['auth_token']
+        self.assertNotEqual(first_auth_token, second_auth_token)
+
 
 class UserLogoutTest(TestCase):
     def setUp(self):
