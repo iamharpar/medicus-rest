@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
 
 from uuid import uuid4
-from .managers import CustomUserManager
+from .managers import CustomUserManager, OrganisationManager, MedicalStaffManager
 
 
 class User(AbstractUser):
@@ -34,6 +34,7 @@ class Organisation(models.Model):
         max_length=300
     )
 
+    objects = OrganisationManager()
 
 class MedicalStaff(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
@@ -46,3 +47,5 @@ class MedicalStaff(models.Model):
         _('medical speciality, if any'), max_length=30, blank=True,
         default='',
     )
+
+    objects = MedicalStaffManager()
