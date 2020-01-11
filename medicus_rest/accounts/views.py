@@ -1,6 +1,10 @@
 from djoser.views import TokenCreateView, TokenDestroyView
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view
+from django.http import JsonResponse
 from rest_framework import viewsets
 from rest_framework import status
+
 from .serializers import UserSerializer
 from .models import User
 
@@ -51,3 +55,22 @@ class UserLogout(TokenDestroyView):
         if response.status_code == status.HTTP_204_NO_CONTENT:
             response.delete_cookie(key='auth_token')
         return response
+
+
+@api_view(['POST'])
+def check_user_logged_in(request):
+    # The only way to verify whether a user is logged in, is to verify
+    # whether the user instance have a corresponding token instance
+    # associated with it. The presence of `token` instance means that
+    # the user is logged in, and to logout user just delete the `user.token`
+    auth_token = request.data.get('auth_token', None)
+    if auth_token is None:
+        return JsonResponse({
+            'error': '`auth_token` not provided !'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    is_logged_in = Token.objects.filter(key=auth_token).exists()
+
+    return JsonResponse({
+        'logged_in': is_logged_in
+    }, status=status.HTTP_200_OK)
