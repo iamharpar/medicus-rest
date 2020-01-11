@@ -10,10 +10,19 @@ from .managers import CustomUserManager
 class User(AbstractUser):
     username = None  # For using email as username
     email = models.EmailField(_('email address'), unique=True)
-    is_medical_staff = models.BooleanField(default=False)
-    is_organisation = models.BooleanField(default=False)
     contact_detail = models.CharField(_('contact detail'), max_length=25)
     address = models.TextField(_('address'))
+
+    class UserType(models.TextChoices):
+        MEDICAL_STAFF = 'MS', _('MS')
+        ORGANISATION = 'OR', _('OR')
+
+    user_type = models.CharField(
+        _('select type of user'),
+        max_length=5,
+        choices=UserType.choices,
+        null=True, default=None
+    )
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

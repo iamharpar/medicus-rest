@@ -9,8 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'url', 'email', 'first_name', 'last_name', 'address',
-            'is_organisation', 'is_medical_staff', 'auth_token',
-            'contact_detail',
+            'user_type', 'auth_token', 'contact_detail',
         ]
 
     def get_auth_token(self, user):

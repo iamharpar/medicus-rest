@@ -16,7 +16,7 @@ class UserSignupTestCase(TestCase):
         self.data = {
             'email': 'email.email1@gmail.com',
             'password': 'shititit',
-            'is_organisation': True,
+            'user_type': 'OR',
             'address': 'Some city, state',
             'contact_detail': 'some@email.com'
         }
@@ -35,7 +35,7 @@ class UserSignupTestCase(TestCase):
             'last_name': 'Last Name',
             'email': 'email.email1@gmail.com',
             'password': 'shititit',
-            'is_organisation': True,
+            'user_type': 'MS',
             'address': 'Some city, state',
             'contact_detail': 'some@email.com'
         }
@@ -106,7 +106,7 @@ class UserLoginTestCase(TestCase):
         self.data = {
             'email': 'email.email1@gmail.com',
             'password': 'helloworld123',
-            'is_organisation': True,
+            'user_type': 'OR',
             'address': 'Some city, state',
             'contact_detail': 'some@email.com'
         }
