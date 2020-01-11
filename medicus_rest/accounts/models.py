@@ -4,7 +4,9 @@ from rest_framework.authtoken.models import Token
 from django.utils.translation import ugettext_lazy as _
 
 from uuid import uuid4
-from .managers import CustomUserManager, OrganisationManager, MedicalStaffManager
+from .managers import (
+    CustomUserManager, OrganizationManager, MedicalStaffManager,
+)
 
 
 class User(AbstractUser):
@@ -15,7 +17,7 @@ class User(AbstractUser):
 
     class UserType(models.TextChoices):
         MEDICAL_STAFF = 'MS', _('MS')
-        ORGANISATION = 'OR', _('OR')
+        organization = 'OR', _('OR')
 
     user_type = models.CharField(
         _('select type of user'),
@@ -41,33 +43,33 @@ class User(AbstractUser):
             return "Medical Staff"
 
         if self.user_type == 'OR':
-            return "Organisation"
+            return "organization"
 
 
-class Organisation(models.Model):
+class Organization(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     description = models.TextField(
-        _('proper description of organisation'),
+        _('proper description of organization'),
     )
     short_description = models.CharField(
-        _('short description of organisation (300 characters)'),
+        _('short description of organization (300 characters)'),
         max_length=300
     )
 
-    objects = OrganisationManager()
+    objects = OrganizationManager()
 
     def __str__(self):
-        return "< ({}) Organisation's {}>".format(self.id, self.user.email)
+        return "< ({}) organization's {}>".format(self.id, self.user.email)
 
 
 class MedicalStaff(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
-    organisation = models.OneToOneField(
-        'Organisation', on_delete=models.DO_NOTHING
+    organization = models.OneToOneField(
+        'organization', on_delete=models.DO_NOTHING
     )
-    role = models.CharField(_('role in organisation'), max_length=30)
+    role = models.CharField(_('role in organization'), max_length=30)
     speciality = models.CharField(
         _('medical speciality, if any'), max_length=30, blank=True,
         default='',
@@ -77,5 +79,5 @@ class MedicalStaff(models.Model):
 
     def __str__(self):
         return "< ({}) Medical Staff {} of {}>".format(
-            self.id, self.user.email, self.organisation.organisation_name
+            self.id, self.user.email, self.organization.organization_name
         )
