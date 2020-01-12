@@ -96,11 +96,11 @@ class UserSignupTestCase(TestCase):
         token = Token.objects.filter(user__email=data['email'])
         self.assertFalse(len(token))
 
-    def test_signup_url(self):
+    def test_get_unauthorized_url_after_signup(self):
         response = self.client.post(self.signup_url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response = self.second_client.get(response.data['url'])
-        print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class UserLoginTestCase(TestCase):

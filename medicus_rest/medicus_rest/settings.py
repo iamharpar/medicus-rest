@@ -156,20 +156,14 @@ STATIC_URL = '/static/'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-    ]
+    ],
 }
 
 # Auth User model & Djsoer
 AUTH_USER_MODEL = 'accounts.User'
 
-SIMPLE_JWT = {
-    'AUTH_HEADER_TYPES': ('JWT',),
-}
-
-JWT_AUTH = {"JWT_ALLOW_REFRESH": True}
-
 DJOSER = {
     'SERIALIZERS': {
         'user_create': 'accounts.serializers.UserSerializer'
-    }
+    },
 }

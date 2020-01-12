@@ -35,7 +35,7 @@ class User(AbstractUser):
         return "< ({}) User ({}) >".format(self.id, self.email)
 
     def get_auth_token(self):
-        token, _ = Token.objects.get_or_create(user=self)
+        token, created = Token.objects.get_or_create(user=self)
         return token.key
 
     def get_complete_user_type(self):

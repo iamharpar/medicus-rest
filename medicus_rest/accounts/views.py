@@ -1,12 +1,10 @@
 from djoser.views import TokenCreateView, TokenDestroyView
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
+from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework.response import Response
-from rest_framework import viewsets
 from rest_framework import status
 
-from .serializers import UserSerializer
-from .models import User
 
 # Okay ! So hear me out on this one. After a discussion about this, with champa
 # "we" concluded that the entire workflow of this application will be based
@@ -25,9 +23,7 @@ from .models import User
 # Man ! that's depressing. :-(
 
 
-class UserModelViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+class UserModelViewSet(DjoserUserViewSet):
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
