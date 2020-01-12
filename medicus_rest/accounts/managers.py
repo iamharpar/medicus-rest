@@ -7,24 +7,24 @@ from django.core.exceptions import ObjectDoesNotExist
 class CustomUserManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(self, email, password, **extra_fields):
+    def _create_user(self, email, password, address, **extra_fields):
         if not email:
             raise ValueError('email must be set')
 
         email = self.normalize_email(email)
         extra_fields.setdefault('user_type', None)
-        user = self.model(email=email, **extra_fields)
+        user = self.model(email=email, address=address, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password, **extra_fields):
+    def create_user(self, email, password, address, **extra_fields):
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
 
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(email, password, address, **extra_fields)
 
-    def create_superuser(self, email, password, **extra_fields):
+    def create_superuser(self, email, password, address, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
@@ -33,7 +33,16 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(email, password, address, **extra_fields)
+
+    def update_user_address(self, email, address):
+        user = super().filter(email)
+        if user:
+            user = user.get(email=email)
+            setattr(user, 'address', address)
+            user.save(using=self._db)
+            return user
+        raise ObjectDoesNotExist('user with {} does not exist'.format(email))
 
     def get_by_natural_key(self, username):
         return self.get(Q(**{self.model.EMAIL_FIELD: username}))
@@ -50,7 +59,7 @@ class OrganizationManager(models.Manager):
         if organization:
             organization.update(**extra_fields)
             return organization
-        raise ObjectDoesNotExist
+        raise ObjectDoesNotExist('No {} organization'.format(user))
 
     def update_organization(self, user, **extra_fields):
         return self._update_organization(user, **extra_fields)
@@ -71,7 +80,7 @@ class MedicalStaffManager(models.Manager):
         if medical_staff:
             medical_staff.update(**extra_fields)
             return medical_staff
-        raise ObjectDoesNotExist
+        raise ObjectDoesNotExist("No {} is medical_staff".format(user))
 
     def update_medicalstaff(self, user, **extra_fields):
         return self._update_medicalstaff(user, **extra_fields)
@@ -83,7 +92,7 @@ class MedicalStaffManager(models.Manager):
             setattr(medical_staff, 'organization', org)
             medical_staff.save(using=self._db)
             return medical_staff
-        raise ObjectDoesNotExist
+        raise ObjectDoesNotExist("No {} medical_staff".format(user))
 
     def create_medicalstaff(self, user, org, **extra_fields):
         return self._create_medicalstaff(user, org, **extra_fields)
