@@ -1,10 +1,9 @@
 from djoser.views import TokenCreateView, TokenDestroyView
+from djoser.views import UserViewSet as DjoserUserViewSet
+from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
-from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework.response import Response
-from rest_framework import status
-
 
 # Okay ! So hear me out on this one. After a discussion about this, with champa
 # "we" concluded that the entire workflow of this application will be based

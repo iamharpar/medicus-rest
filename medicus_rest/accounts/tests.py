@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 
+from .models import Address
 
 User = get_user_model()
 
@@ -20,12 +21,24 @@ class UserSignupTestCase(TestCase):
             'email': 'email.email1@gmail.com',
             'password': 'shititit',
             'user_type': 'OR',
-            'address': 'Some city, state',
-            'contact_detail': 'some@email.com'
+            'contact_detail': 'some@email.com',
+            'address': {
+                'street': 'Some street 1',
+                'city': 'newyork',
+                'state': 'NJ',
+                'pincode': '39458',
+                'country': 'US',
+            },
         }
 
     def get_user(self):
         return User.objects.get(email=self.data['email'])
+
+    def create_user(self):
+        address = Address.objects.create(**self.data['address'])
+        data_without_addr = self.data
+        data_without_addr.pop("address", [])
+        User.objects.create_user(address=address, **self.data)
 
     def test_signup_with_incorrect_fields(self):
         data = {'title': 'new idea'}
@@ -39,7 +52,13 @@ class UserSignupTestCase(TestCase):
             'email': 'email.email1@gmail.com',
             'password': 'shititit',
             'user_type': 'MS',
-            'address': 'Some city, state',
+            'address': {
+                'street': 'Some street 1',
+                'city': 'newyork',
+                'state': 'NJ',
+                'pincode': '39458',
+                'country': 'US',
+            },
             'contact_detail': 'some@email.com'
         }
         response = self.client.post(self.signup_url, data, format='json')
@@ -52,12 +71,12 @@ class UserSignupTestCase(TestCase):
         self.assertTrue(user.is_authenticated and user.is_active)
 
     def test_signup_with_already_existing_user(self):
-        User.objects.create_user(**self.data)
+        self.create_user()
         response = self.client.post(self.signup_url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_signup_already_logged_in_user(self):
-        User.objects.create_user(**self.data)
+        self.create_user()
         is_logged_in = self.client.login(
             username=self.data['email'], password=self.data['password']
         )
@@ -112,17 +131,29 @@ class UserLoginTestCase(TestCase):
             'email': 'email.email1@gmail.com',
             'password': 'helloworld123',
             'user_type': 'OR',
-            'address': 'Some city, state',
-            'contact_detail': 'some@email.com'
+            'contact_detail': 'some@email.com',
+            'address': {
+                'street': 'Some street 1',
+                'city': 'newyork',
+                'state': 'NJ',
+                'pincode': '39458',
+                'country': 'US',
+            },
         }
         self.login_data = {
             'email': 'email.email1@gmail.com',
             'password': 'helloworld123'
         }
-        self.user = User.objects.create_user(**self.data)
+        self.user = self.create_user()
 
     def get_user(self):
         return User.objects.get(email=self.data['email'])
+
+    def create_user(self):
+        address = Address.objects.create(**self.data['address'])
+        data_without_addr = self.data
+        data_without_addr.pop("address", [])
+        User.objects.create_user(address=address, **self.data)
 
     def test_login_user(self):
         response = self.client.post(
@@ -173,7 +204,13 @@ class UserLogoutTest(TestCase):
             'email': 'email.email1@gmail.com',
             'password': 'helloworld123',
             'user_type': 'OR',
-            'address': 'Some city, state',
+            'address': {
+                'street': 'Some street 1',
+                'city': 'newyork',
+                'state': 'NJ',
+                'pincode': '39458',
+                'country': 'US',
+            },
             'contact_detail': 'some@email.com'
         }
         self.login_data = {
@@ -182,7 +219,10 @@ class UserLogoutTest(TestCase):
         }
 
     def create_user(self):
-        return User.objects.create_user(**self.data)
+        address = Address.objects.create(**self.data['address'])
+        data_without_addr = self.data
+        data_without_addr.pop("address", [])
+        return User.objects.create_user(address=address, **self.data)
 
     def test_logout_user_after_signup(self):
         response = self.client.post(self.signup_url, self.data, format='json')
@@ -229,19 +269,31 @@ class UserCheckLoginTestCase(TestCase):
             'email': 'email.email1@gmail.com',
             'password': 'shititit',
             'user_type': 'OR',
-            'address': 'Some city, state',
-            'contact_detail': 'some@email.com'
+            'contact_detail': 'some@email.com',
+            'address': {
+                'street': 'Some street 1',
+                'city': 'newyork',
+                'state': 'NJ',
+                'pincode': '39458',
+                'country': 'US',
+            },
         }
         self.check_data = {
             'auth_token': '',
         }
+
+    def create_user(self):
+        address = Address.objects.create(**self.data['address'])
+        data_without_addr = self.data
+        data_without_addr.pop("address", [])
+        return User.objects.create_user(address=address, **self.data)
 
     def signup_user(self):
         return self.client.post(self.signup_url, self.data, format='json')
 
     def login_user(self, create_user=False):
         if create_user:
-            User.objects.create_user(**self.data)
+            self.create_user()
         return self.client.post(self.login_url, self.data, format='json')
 
     def logout_user(self, auth_token):
