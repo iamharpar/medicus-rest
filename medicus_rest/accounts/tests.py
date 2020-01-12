@@ -12,6 +12,7 @@ User = get_user_model()
 class UserSignupTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
+        self.second_client = APIClient()
         self.login_url = reverse("login")
         self.logout_url = reverse("logout")
         self.signup_url = reverse("user-list")
@@ -95,6 +96,12 @@ class UserSignupTestCase(TestCase):
         token = Token.objects.filter(user__email=data['email'])
         self.assertFalse(len(token))
 
+    def test_signup_url(self):
+        response = self.client.post(self.signup_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.second_client.get(response.data['url'])
+        print(response.data)
+
 
 class UserLoginTestCase(TestCase):
     def setUp(self):
@@ -154,17 +161,6 @@ class UserLoginTestCase(TestCase):
         )
         cookie_dict = response.client.cookies
         self.assertTrue(cookie_dict['auth_token'])
-
-    def test_auth_token_from_two_logins(self):
-        response = self.client.post(
-            self.login_url, self.login_data, format='json'
-        )
-        first_auth_token = response.data['auth_token']
-        response = self.client.post(
-            self.login_url, self.login_data, format='json'
-        )
-        second_auth_token = response.data['auth_token']
-        self.assertNotEqual(first_auth_token, second_auth_token)
 
 
 class UserLogoutTest(TestCase):
