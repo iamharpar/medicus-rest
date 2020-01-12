@@ -36,6 +36,10 @@ class UserSerializer(serializers.ModelSerializer):
             'url', 'email', 'address', 'medical_staff', 'user_type',
             'auth_token', 'contact_detail', 'organization',
         ]
+        extra_kwargs = {
+            'contact_detail': {'required': True},
+            'user_type':  {'required': True},
+        }
 
     def get_auth_token(self, user):
         return user.get_auth_token()
