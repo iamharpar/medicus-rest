@@ -5,6 +5,16 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from datetime import datetime
+
+
+@api_view(['GET'])
+def ping(request):
+    return Response({
+        'status': 'pong {}'.format(datetime.now()),
+    }, content_type='json')
+
+
 # Okay ! So hear me out on this one. After a discussion about this, with champa
 # "we" concluded that the entire workflow of this application will be based
 # on REST ful services, but since the guidelines for developing a RESTfull
