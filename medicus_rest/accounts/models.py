@@ -13,24 +13,22 @@ class Address(models.Model):
     pincode = models.CharField(_('pincode'), max_length=10)
 
     def __str__(self):
-        return "<({}) Address {}, {} - {}, {}, {}.".format(
+        return "<({}) Address {}, {}.".format(
             self.id, self.pincode, self.country
         )
 
 
 class Organization(models.Model):
-    user = models.OneToOneField('User', on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     description = models.TextField(
         _('proper description of organization'),
     )
 
     def __str__(self):
-        return "< ({}) organization's {}>".format(self.id, self.user.email)
+        return "< ({}) organization>".format(self.id)
 
 
 class MedicalStaff(models.Model):
-    user = models.OneToOneField('User', on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     organization = models.OneToOneField(
         'organization', on_delete=models.DO_NOTHING
@@ -42,8 +40,8 @@ class MedicalStaff(models.Model):
     )
 
     def __str__(self):
-        return "< ({}) Medical Staff {} of {}>".format(
-            self.id, self.user.email, self.organization.organization_name
+        return "< ({}) Medical Staff of {}>".format(
+            self.id, self.organization.organization_name
         )
 
 
@@ -53,8 +51,13 @@ class User(AbstractUser):
     last_name = models.CharField(_('last name'), max_length=30)
     email = models.EmailField(_('email address'), unique=True)
     contact_detail = models.CharField(_('contact detail'), max_length=25)
-    address = models.OneToOneField(
-        'Address', on_delete=models.DO_NOTHING)
+    address = models.OneToOneField('Address', on_delete=models.DO_NOTHING)
+    organization = models.OneToOneField(
+        'Organization', on_delete=models.DO_NOTHING, null=True
+    )
+    medical_staff = models.OneToOneField(
+        'MedicalStaff', on_delete=models.DO_NOTHING, null=True
+    )
 
     class UserType(models.TextChoices):
         MEDICAL_STAFF = 'MS', _('MS')

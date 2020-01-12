@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 
-from .models import Address
+from .models import Address, Organization
 
 User = get_user_model()
 
@@ -29,8 +29,8 @@ class UserSignupTestCase(TestCase):
                 'pincode': '39458',
                 'country': 'US',
             },
-            'extra': {
-                'desciption': 'Some bullshit description'
+            'organization': {
+                'description': 'Some bullshit description'
             },
         }
 
@@ -38,10 +38,13 @@ class UserSignupTestCase(TestCase):
         return User.objects.get(email=self.data['email'])
 
     def create_user(self):
-        address = Address.objects.create(**self.data['address'])
-        data_without_addr = self.data
-        data_without_addr.pop("address", [])
-        User.objects.create_user(address=address, **self.data)
+        data = dict(self.data)
+        data['address'] = Address.objects.create(**data['address'])
+        data['organization'] = Organization.objects.create(
+            **data['organization']
+        )
+        User.objects.create_user(**data)
+
 
     def test_signup_with_incorrect_fields(self):
         data = {'title': 'new idea'}
@@ -64,8 +67,8 @@ class UserSignupTestCase(TestCase):
 
     def test_signup_with_correct_fields(self):
         response = self.client.post(self.signup_url, self.data, format='json')
+        print("data is here", response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        print(response.data)
         user = self.get_user()
         self.assertTrue(user.is_authenticated and user.is_active)
 

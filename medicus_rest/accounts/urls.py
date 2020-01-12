@@ -2,7 +2,7 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path
 from .views import (
     UserModelViewSet, ping, UserLogin,
-    UserLogout, check_user_logged_in
+    UserLogout, check_user_logged_in,
 )
 
 router = DefaultRouter()

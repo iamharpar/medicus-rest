@@ -7,24 +7,23 @@ from django.core.exceptions import ObjectDoesNotExist
 class CustomUserManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(self, email, password, address, **extra_fields):
-        if not email:
+    def _create_user(self, **extra_fields):
+        if "email" not in extra_fields:
             raise ValueError('email must be set')
 
-        extra_fields.pop('address', [])  # remove address in case it's passed
-        extra_fields.pop('extra', [])
+        email = extra_fields.pop('email')  # remove address in case it's passed
         email = self.normalize_email(email)
         extra_fields.setdefault('user_type', None)
-        user = self.model(email=email, address=address, **extra_fields)
-        user.set_password(password)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(extra_fields['password'])
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password, address, **extra_fields):
+    def create_user(self, **extra_fields):
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
 
-        return self._create_user(email, password, address, **extra_fields)
+        return self._create_user(**extra_fields)
 
     def create_superuser(self, email, password, address, **extra_fields):
         extra_fields.setdefault('is_staff', True)
