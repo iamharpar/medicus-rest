@@ -53,10 +53,10 @@ class User(AbstractUser):
     contact_detail = models.CharField(_('contact detail'), max_length=25)
     address = models.OneToOneField('Address', on_delete=models.DO_NOTHING)
     organization = models.OneToOneField(
-        'Organization', on_delete=models.DO_NOTHING, null=True
+        'Organization', on_delete=models.DO_NOTHING, null=True, default=None,
     )
     medical_staff = models.OneToOneField(
-        'MedicalStaff', on_delete=models.DO_NOTHING, null=True
+        'MedicalStaff', on_delete=models.DO_NOTHING, null=True, default=None,
     )
 
     class UserType(models.TextChoices):

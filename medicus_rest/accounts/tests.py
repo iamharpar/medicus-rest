@@ -45,7 +45,6 @@ class UserSignupTestCase(TestCase):
         )
         User.objects.create_user(**data)
 
-
     def test_signup_with_incorrect_fields(self):
         data = {'title': 'new idea'}
         response = self.client.post(self.signup_url, data, format='json')
@@ -67,7 +66,6 @@ class UserSignupTestCase(TestCase):
 
     def test_signup_with_correct_fields(self):
         response = self.client.post(self.signup_url, self.data, format='json')
-        print("data is here", response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         user = self.get_user()
         self.assertTrue(user.is_authenticated and user.is_active)
