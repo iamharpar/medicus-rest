@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import User, Address
+from .models import (
+    User, Address
+)
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -10,18 +12,22 @@ class AddressSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    auth_token = serializers.SerializerMethodField('get_auth_token')
     address = AddressSerializer()
+    extra = serializers.SerializerMethodField('create_required_user_type')
+    auth_token = serializers.SerializerMethodField('get_auth_token')
 
     class Meta:
         model = User
         fields = [
             'url', 'email', 'first_name', 'last_name', 'address',
-            'user_type', 'auth_token', 'contact_detail',
+            'user_type', 'auth_token', 'contact_detail', 'extra',
         ]
 
     def get_auth_token(self, user):
         return user.get_auth_token()
+
+    def create_required_user_type(self, user):
+        print(user)
 
     def create(self, validated_data):
         address_data = validated_data.pop('address')

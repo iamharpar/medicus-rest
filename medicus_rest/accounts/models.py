@@ -68,8 +68,6 @@ class Organization(models.Model):
         _('proper description of organization'),
     )
 
-    objects = OrganizationManager()
-
     def __str__(self):
         return "< ({}) organization's {}>".format(self.id, self.user.email)
 
@@ -85,8 +83,6 @@ class MedicalStaff(models.Model):
         _('medical speciality, if any'), max_length=30, blank=True,
         default='',
     )
-
-    objects = MedicalStaffManager()
 
     def __str__(self):
         return "< ({}) Medical Staff {} of {}>".format(
