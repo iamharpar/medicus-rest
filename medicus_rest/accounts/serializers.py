@@ -48,7 +48,7 @@ class UserSerializer(serializers.ModelSerializer):
             validated_data['medical_staff'] = MedicalStaff.objects.create(
                 **validated_data['medical_staff']
             )
-        if 'organization' in validated_data:
+        else:
             validated_data['organization'] = Organization.objects.create(
                 **validated_data['organization']
             )
