@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .serializers import (
+    UserSerializer,
     OrganizationSerializer, MedicalStaffSerializer,
 )
 from datetime import datetime
@@ -55,9 +56,20 @@ class UserLogin(TokenCreateView):
             response.set_cookie(key='auth_token', value=auth_token)
         return response
 
+    def update_response_body(self, response):
+        if response.status_code == status.HTTP_200_OK:
+            auth_token = response.data['auth_token']
+            user = Token.objects.get(key=auth_token).user
+            serializer = UserSerializer(instance=user, context={
+                'request': self.request,
+            })
+            response.data['user'] = serializer.data
+        return response
+
     def post(self, request, **kwargs):
         response = super().post(request, **kwargs)
-        return self.set_auth_cookie(response=response)
+        response = self.set_auth_cookie(response=response)
+        return self.update_response_body(response)
 
 
 class UserLogout(TokenDestroyView):
