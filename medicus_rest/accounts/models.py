@@ -49,16 +49,14 @@ class User(AbstractUser):
 
 
 class Address(models.Model):
-    street = models.CharField(_('street name'), max_length=60)
-    city = models.CharField(_('City name'), max_length=50)
-    state = models.CharField(_('State name'), max_length=50)
+    address = models.TextField(_('Entire address'))
     country = models.CharField(_('Country name'), max_length=50, default='US')
     pincode = models.CharField(_('pincode'), max_length=10)
 
     def __str__(self):
         return "<({}) Address {}, {} - {}, {}, {}.".format(
-            self.id, self.street, self.city, self.pincode,
-            self.state, self.country)
+            self.id, self.pincode, self.country
+        )
 
 
 class Organization(models.Model):
