@@ -12,6 +12,7 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('email must be set')
 
         extra_fields.pop('address', [])  # remove address in case it's passed
+        extra_fields.pop('extra', [])
         email = self.normalize_email(email)
         extra_fields.setdefault('user_type', None)
         user = self.model(email=email, address=address, **extra_fields)
