@@ -30,7 +30,7 @@ class UserSignupTestCase(TestCase):
                 'country': 'US',
             },
             'extra': {
-                'description': 'Some bullshit description'
+                'desciption': 'Some bullshit description'
             },
         }
 
@@ -65,6 +65,7 @@ class UserSignupTestCase(TestCase):
     def test_signup_with_correct_fields(self):
         response = self.client.post(self.signup_url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        print(response.data)
         user = self.get_user()
         self.assertTrue(user.is_authenticated and user.is_active)
 

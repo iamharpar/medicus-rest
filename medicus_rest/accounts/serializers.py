@@ -13,7 +13,7 @@ class AddressSerializer(serializers.ModelSerializer):
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ['description', ]
+        fields = ['user', 'description', ]
 
 
 class MedicalStaffSerializer(serializers.ModelSerializer):
@@ -21,7 +21,7 @@ class MedicalStaffSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MedicalStaff
-        fields = ['organization', 'role', 'speciality', ]
+        fields = ['user', 'organization', 'role', 'speciality', ]
 
     def create(self, validated_data):
         organization_name = validated_data.pop('organization', [])
@@ -53,7 +53,26 @@ class UserSerializer(serializers.ModelSerializer):
         return user.get_auth_token()
 
     def get_extra_user_data(self, user):
-        self.extra_initial_data = self.initial_data['extra']
+        extra_initial_data = self.initial_data['extra']
+        extra_initial_data['user'] = user.pk
+
+        if user.user_type == 'OR':
+            extra_data_serializer_class = OrganizationSerializer
+        if user.user_type == 'MS':
+            extra_data_serializer_class = MedicalStaffSerializer
+
+        extra_data_serializer = extra_data_serializer_class(
+            data=extra_initial_data
+        )
+
+        if extra_data_serializer.is_valid():
+            extra_data_serializer.save()
+            return extra_data_serializer.data
+
+        self.fields['user_extra'].error_message = extra_data_serializer.errors
+        if extra_data_serializer.errors:
+            user.delete()
+        return extra_data_serializer.errors
 
     def create(self, validated_data):
         address_data = validated_data.pop('address')
