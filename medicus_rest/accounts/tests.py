@@ -6,6 +6,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from .models import Address
+from .managers import OrganizationManager, MedicalStaffManager
 
 User = get_user_model()
 
@@ -325,3 +326,13 @@ class UserCheckLoginTestCase(TestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class OrganizationManagerTestCase(TestCase):
+    def setUp(self):
+        self.manager = OrganizationManager
+
+
+class MedicalStaffManagerTestCase(TestCase):
+    def setUp(self):
+        self.manager = MedicalStaffManager
