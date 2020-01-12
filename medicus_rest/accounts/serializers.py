@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 from .models import (
     User, Address, MedicalStaff, Organization
 )
@@ -14,7 +13,7 @@ class AddressSerializer(serializers.ModelSerializer):
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ['description', ]
+        fields = ['name', 'description', ]
 
 
 class MedicalStaffSerializer(serializers.ModelSerializer):
@@ -22,7 +21,7 @@ class MedicalStaffSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MedicalStaff
-        fields = ['organization', 'role', 'speciality', ]
+        fields = ['name', 'organization', 'role', 'speciality', ]
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -34,9 +33,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'url', 'email', 'first_name', 'last_name', 'address',
-            'medical_staff', 'user_type', 'auth_token', 'contact_detail',
-            'organization',
+            'url', 'email','address','medical_staff', 'user_type', 
+            'auth_token', 'contact_detail','organization',
         ]
 
     def get_auth_token(self, user):

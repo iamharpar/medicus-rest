@@ -20,16 +20,18 @@ class Address(models.Model):
 
 class Organization(models.Model):
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
+    name = models.CharField(_('organization name'), max_length=30)
     description = models.TextField(
         _('proper description of organization'),
     )
 
     def __str__(self):
-        return "< ({}) organization>".format(self.id)
+        return "< ({}) organization>".format(self.name)
 
 
 class MedicalStaff(models.Model):
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
+    name = models.CharField(_('medical staff name'), max_length=50)
     organization = models.OneToOneField(
         'organization', on_delete=models.DO_NOTHING
     )
@@ -41,14 +43,12 @@ class MedicalStaff(models.Model):
 
     def __str__(self):
         return "< ({}) Medical Staff of {}>".format(
-            self.id, self.organization.organization_name
+            self.name, self.organization.organization_name
         )
 
 
 class User(AbstractUser):
-    username = None  # For using email as username
-    first_name = models.CharField(_('first name'), max_length=30)
-    last_name = models.CharField(_('last name'), max_length=30)
+    username, first_name, last_name = None, None, None  # exclude fields
     email = models.EmailField(_('email address'), unique=True)
     contact_detail = models.CharField(_('contact detail'), max_length=25)
     address = models.OneToOneField('Address', on_delete=models.DO_NOTHING)
