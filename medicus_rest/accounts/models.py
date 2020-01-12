@@ -81,3 +81,10 @@ class User(AbstractUser):
     def get_auth_token(self):
         token, created = Token.objects.get_or_create(user=self)
         return token.key
+
+    def get_user_type(self):
+        if self.user_type == 'MS':
+            return self.medical_staff
+
+        if self.user_type == 'OR':
+            return self.organization

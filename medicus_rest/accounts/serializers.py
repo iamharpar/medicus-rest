@@ -33,8 +33,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'url', 'email','address','medical_staff', 'user_type', 
-            'auth_token', 'contact_detail','organization',
+            'url', 'email', 'address', 'medical_staff', 'user_type',
+            'auth_token', 'contact_detail', 'organization',
         ]
 
     def get_auth_token(self, user):
@@ -46,7 +46,7 @@ class UserSerializer(serializers.ModelSerializer):
             validated_data['medical_staff'] = MedicalStaff.objects.create(
                 **validated_data['medical_staff']
             )
-        else:
+        if 'organization' in validated_data:
             validated_data['organization'] = Organization.objects.create(
                 **validated_data['organization']
             )
