@@ -53,7 +53,6 @@ class UserSerializer(serializers.ModelSerializer):
         return user.get_auth_token()
 
     def get_extra_user_data(self, user):
-        self.user_type = self.initial_data['user_type']
         self.extra_initial_data = self.initial_data['extra']
 
     def create(self, validated_data):
