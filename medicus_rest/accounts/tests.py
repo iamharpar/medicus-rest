@@ -18,14 +18,14 @@ class UserSignupTestCase(TestCase):
         self.logout_url = reverse("logout")
         self.signup_url = reverse("user-list")
         self.data = {
+            'first_name': 'first_name',
+            'last_name': 'last_name',
             'email': 'email.email1@gmail.com',
             'password': 'shititit',
             'user_type': 'OR',
             'contact_detail': 'some@email.com',
             'address': {
-                'street': 'Some street 1',
-                'city': 'newyork',
-                'state': 'NJ',
+                'address': 'Some Address or Shit',
                 'pincode': '39458',
                 'country': 'US',
             },
@@ -45,24 +45,19 @@ class UserSignupTestCase(TestCase):
         response = self.client.post(self.signup_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_signup_with_optional_fields(self):
+    def test_signup_without_required_fields(self):
         data = {
-            'first_name': 'First Name',
-            'last_name': 'Last Name',
             'email': 'email.email1@gmail.com',
             'password': 'shititit',
             'user_type': 'MS',
             'address': {
-                'street': 'Some street 1',
-                'city': 'newyork',
-                'state': 'NJ',
                 'pincode': '39458',
                 'country': 'US',
             },
             'contact_detail': 'some@email.com'
         }
         response = self.client.post(self.signup_url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_signup_with_correct_fields(self):
         response = self.client.post(self.signup_url, self.data, format='json')
@@ -128,14 +123,14 @@ class UserLoginTestCase(TestCase):
         self.login_url = reverse("login")
         self.logout_url = reverse("logout")
         self.data = {
+            'first_name': 'first_name',
+            'last_name': 'last_name',
             'email': 'email.email1@gmail.com',
             'password': 'helloworld123',
             'user_type': 'OR',
             'contact_detail': 'some@email.com',
             'address': {
-                'street': 'Some street 1',
-                'city': 'newyork',
-                'state': 'NJ',
+                'address': 'Some address',
                 'pincode': '39458',
                 'country': 'US',
             },
@@ -201,13 +196,13 @@ class UserLogoutTest(TestCase):
         self.login_url = reverse("login")
         self.logout_url = reverse("logout")
         self.data = {
+            'first_name': 'first_name',
+            'last_name': 'last_name',
             'email': 'email.email1@gmail.com',
             'password': 'helloworld123',
             'user_type': 'OR',
             'address': {
-                'street': 'Some street 1',
-                'city': 'newyork',
-                'state': 'NJ',
+                'address': 'some address',
                 'pincode': '39458',
                 'country': 'US',
             },
@@ -266,14 +261,14 @@ class UserCheckLoginTestCase(TestCase):
             'password': 'shititit',
         }
         self.data = {
+            'first_name': 'first_name',
+            'last_name': 'last_name',
             'email': 'email.email1@gmail.com',
             'password': 'shititit',
             'user_type': 'OR',
             'contact_detail': 'some@email.com',
             'address': {
-                'street': 'Some street 1',
-                'city': 'newyork',
-                'state': 'NJ',
+                'address': 'some address',
                 'pincode': '39458',
                 'country': 'US',
             },
