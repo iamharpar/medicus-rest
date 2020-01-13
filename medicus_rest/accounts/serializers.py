@@ -1,9 +1,10 @@
 from rest_framework import serializers
-from organization.serializers import OrganizationSerializer
 from organization.models import Organization
-from .models import (
-    User, Address, MedicalStaff
-)
+from organization.serializers import OrganizationSerializer
+from medical_staff.models import MedicalStaff
+from medical_staff.serializers import MedicalStaffSerializer
+
+from .models import User, Address
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -14,24 +15,6 @@ class AddressSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         return dict(data)
-
-
-class MedicalStaffSerializer(serializers.ModelSerializer):
-    organization = serializers.CharField()
-
-    class Meta:
-        model = MedicalStaff
-        fields = ['name', 'organization', 'role', 'speciality', ]
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        return dict(data)
-
-    def create(self, validated_data):
-        organization_name = validated_data.pop('organization', [])
-        organization = Organization.objects.get(name=organization_name)
-        validated_data.update({'organization': organization})
-        return super().create(validated_data)
 
 
 class UserSerializer(serializers.ModelSerializer):

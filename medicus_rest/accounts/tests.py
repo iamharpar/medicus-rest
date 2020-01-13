@@ -5,11 +5,10 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 
-from .models import (
-    Address, MedicalStaff
-)
+from .models import Address
 
 from organization.models import Organization
+#from medical_staff.models import MedicalStaff
 
 User = get_user_model()
 
