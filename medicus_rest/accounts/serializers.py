@@ -1,9 +1,7 @@
 from rest_framework import serializers
-from organization.models import Organization
 from organization.serializers import OrganizationSerializer
-from medical_staff.models import MedicalStaff
 from medical_staff.serializers import MedicalStaffSerializer
-from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import ugettext_lazy as _
 
 from .models import User, Address
 
@@ -42,34 +40,47 @@ class UserSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         return dict(data)
 
+    def get_user_type_serializer_instance(self, validated_data):
+        is_medical_staff = 'medical_staff' in validated_data
+        is_organization = 'organization' in validated_data
+
+        if is_medical_staff and is_organization:
+            raise serializers.ValidationError(_(
+                "`user` cannot be both, kindly give data for "
+                "request body should respect the `user_type` field"
+            ))
+
+        if not (is_medical_staff or is_organization):
+            raise serializers.ValidationError(_(
+                "no `user_type` related details provided"
+            ))
+
+        if is_medical_staff:
+            self.user_type = 'medical_staff'
+            return MedicalStaffSerializer(data=validated_data[self.user_type])
+
+        if is_organization:
+            self.user_type = 'organization'
+            return OrganizationSerializer(data=validated_data[self.user_type])
+
+    def create_address(self, validated_data):
+        address_data = validated_data['address']
+        address_serializer = AddressSerializer(data=address_data)
+        address_serializer.is_valid(raise_exception=True)
+        address_instance = address_serializer.save()
+        validated_data.update({'address': address_instance})
+        return validated_data
+
+    def create_user_type_instance(self, validated_data):
+        user_type_serializer = self.get_user_type_serializer_instance(
+            validated_data
+        )
+        user_type_serializer.is_valid(raise_exception=True)
+        user_type_instance = user_type_serializer.save()
+        validated_data.update({self.user_type: user_type_instance})
+        return validated_data
+
     def create(self, validated_data):
-            # print("UserSerializer create")
-            # a medical_staff object takes in
-            # a organization object as a result
-            # organization conditonal statements
-            # are transfered before the medical_staff
-            if 'medical_staff' in validated_data:
-                validated_data['medical_staff'] = MedicalStaff.objects.create(
-                    **validated_data['medical_staff']
-                )
-
-            address_data = validated_data.pop('address')
-            org_object = None
-            if 'organization' in validated_data:
-                # print(validated_data['organization']['name'])
-                try:
-                    org_object = Organization.objects.get(
-                        name=validated_data['organization']['name']
-                    )
-                    validated_data['organization'] = org_object
-                except ObjectDoesNotExist:
-                    validated_data['organization'] = Organization.objects.create(
-                        **validated_data['organization']
-                    )
-
-            address = Address.objects.create(**address_data)
-            user = User.objects.create(
-                address=address, **validated_data
-            )
-
-            return user
+        validated_data = self.create_user_type_instance(validated_data)
+        validated_data = self.create_address(validated_data)
+        return User.objects.create(**validated_data)

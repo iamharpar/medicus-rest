@@ -23,12 +23,12 @@ class User(AbstractUser):
     contact_detail = models.CharField(_('contact detail'), max_length=25)
     address = models.OneToOneField('Address', on_delete=models.DO_NOTHING)
     organization = models.OneToOneField(
-        'organization.Organization', on_delete=models.DO_NOTHING, 
-        null=True, default=None,
+        'organization.Organization', on_delete=models.DO_NOTHING,
+        null=True, default=None, related_name='to_organization',
     )
     medical_staff = models.OneToOneField(
-        'medical_staff.MedicalStaff', on_delete=models.DO_NOTHING, 
-        null=True, default=None,
+        'medical_staff.MedicalStaff', on_delete=models.DO_NOTHING,
+        null=True, default=None, related_name='to_medical_staff',
     )
 
     class UserType(models.TextChoices):
