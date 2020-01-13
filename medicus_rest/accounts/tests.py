@@ -198,6 +198,13 @@ class OrganizationTestCase(TestCase):
             user.organization.name, self.data['organization']['name']
         )
 
+    def test_organization_creation_existing_organization(self):
+        self.create_user()
+        data = dict(self.data)
+        data['email'] = 'some.other_email@email.com'
+        response = self.client.post(self.signup_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class UserLoginTestCase(TestCase):
     def setUp(self):
