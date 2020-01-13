@@ -476,6 +476,12 @@ class MedicalSatffTestCase(TestCase):
     def create_user(self):
         data = dict(self.data)
         data['address'] = Address.objects.create(**data['address'])
+        # the below double assignment of organization and 
+        # medical_staff organization is performed because
+        # a medical_staff takes a object of organization
+        # therefore we need to pass a organization into
+        # the create method of MedicalStaff to execute it
+        # properly
         data['organization'] = Organization.objects.create(
             **data['organization']
         )

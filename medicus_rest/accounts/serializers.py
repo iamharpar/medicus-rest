@@ -51,9 +51,15 @@ class UserSerializer(serializers.ModelSerializer):
                 **validated_data['organization']
             )
 
+        # a medical_staff object takes in
+        # a organization object as a result
+        # organization conditonal statements
+        # are transfered before the medical_staff
         if 'medical_staff' in validated_data:
             org_object = validated_data['organization']
             if org_object.name == validated_data['medical_staff']['organization']:
+                # used del because dict.pop() cannot be used to 
+                # delete nested dicts
                 del validated_data['medical_staff']['organization']
             validated_data['medical_staff'] = MedicalStaff.objects.create(
                 organization=org_object, **validated_data['medical_staff']
