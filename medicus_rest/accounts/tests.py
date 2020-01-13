@@ -504,7 +504,13 @@ class MedicalSatffTestCase(TestCase):
         data['organization'] = Organization.objects.create(
             **data['organization']
         )
-        data['medical_staff']['organization'] = data['organization']
+        # org_object = Organization.objects.get(
+        #     name=data['medical_staff']['organization']['name']
+        # )
+        # data['medical_staff']['organization'] = org_object.id
+
+        # NOTE: This should work but for some reason the create
+        #       method is not getting called.
         data['medical_staff'] = MedicalStaff.objects.create(
             **data['medical_staff']
         )
@@ -512,6 +518,7 @@ class MedicalSatffTestCase(TestCase):
 
     def test_medical_staff_valid_signup(self):
         response = self.client.post(self.signup_url, self.data, format='json')
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         user = self.get_user()
         self.assertTrue(user.is_authenticated and user.is_active)

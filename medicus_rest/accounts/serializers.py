@@ -43,7 +43,7 @@ class UserSerializer(serializers.ModelSerializer):
         return dict(data)
 
     def create(self, validated_data):
-            print("UserSerializer create")
+            # print("UserSerializer create")
             # a medical_staff object takes in
             # a organization object as a result
             # organization conditonal statements
@@ -56,7 +56,7 @@ class UserSerializer(serializers.ModelSerializer):
             address_data = validated_data.pop('address')
             org_object = None
             if 'organization' in validated_data:
-                print(validated_data['organization']['name'])
+                # print(validated_data['organization']['name'])
                 try:
                     org_object = Organization.objects.get(
                         name=validated_data['organization']['name']

@@ -15,7 +15,8 @@ class MedicalStaffSerializer(serializers.ModelSerializer):
         return dict(data)
 
     def create(self, validated_data):
+        print("MedicalStaffSerializer called")
         organization_name = validated_data.pop('organization', [])
         organization = Organization.objects.get(name=organization_name)
-        validated_data.update({'organization': organization})
+        validated_data.update({'organization': organization.id})
         return super().create(validated_data)
