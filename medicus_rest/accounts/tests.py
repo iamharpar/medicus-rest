@@ -7,8 +7,10 @@ from rest_framework import status
 
 from uuid import uuid4
 from .models import (
-    Address, Organization, MedicalStaff
+    Address, MedicalStaff
 )
+
+from organization.models import Organization
 
 User = get_user_model()
 

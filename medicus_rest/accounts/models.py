@@ -18,23 +18,12 @@ class Address(models.Model):
         )
 
 
-class Organization(models.Model):
-    uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
-    name = models.CharField(_('organization name'), max_length=30, unique=True)
-    description = models.TextField(
-        _('proper description of organization'),
-    )
-
-    def __str__(self):
-        return "< ({}) organization>".format(self.name)
-
-
 class MedicalStaff(models.Model):
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     name = models.CharField(_('medical staff name'), max_length=50)
     is_verified = models.BooleanField(default=False)
     organization = models.OneToOneField(
-        'organization', on_delete=models.DO_NOTHING
+        'organization.Organization', on_delete=models.DO_NOTHING
     )
     role = models.CharField(_('role in organization'), max_length=30)
     speciality = models.CharField(
@@ -54,7 +43,8 @@ class User(AbstractUser):
     contact_detail = models.CharField(_('contact detail'), max_length=25)
     address = models.OneToOneField('Address', on_delete=models.DO_NOTHING)
     organization = models.OneToOneField(
-        'Organization', on_delete=models.DO_NOTHING, null=True, default=None,
+        'organization.Organization', on_delete=models.DO_NOTHING, 
+        null=True, default=None,
     )
     medical_staff = models.OneToOneField(
         'MedicalStaff', on_delete=models.DO_NOTHING, null=True, default=None,

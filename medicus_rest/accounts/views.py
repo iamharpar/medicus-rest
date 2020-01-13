@@ -7,7 +7,6 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Organization
 from .serializers import (MedicalStaffSerializer, OrganizationSerializer,
                           UserSerializer)
 
@@ -80,11 +79,6 @@ class UserLogout(TokenDestroyView):
         if response.status_code == status.HTTP_204_NO_CONTENT:
             response.delete_cookie(key='auth_token')
         return response
-
-
-class OrganizationModeAPIView(generics.ListAPIView):
-    queryset = Organization.objects.all()
-    serializer_class = OrganizationSerializer
 
 
 @api_view(['POST'])
