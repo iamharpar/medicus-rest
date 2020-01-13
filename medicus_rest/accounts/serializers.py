@@ -20,7 +20,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
         fields = ['name', 'description', ]
 
     def to_representation(self, instance):
-        data = super(OrganizationSerializer, self).to_representation(instance)
+        data = super().to_representation(instance)
         return dict(data)
 
 
@@ -34,6 +34,12 @@ class MedicalStaffSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         return dict(data)
+
+    def create(self, validated_data):
+        organization_name = validated_data.pop('organization', [])
+        organization = Organization.objects.get(name=organization_name)
+        validated_data.update({'organization': organization})
+        return super().create(validated_data)
 
 
 class UserSerializer(serializers.ModelSerializer):
