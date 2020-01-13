@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 
+from uuid import uuid4
 from .models import (
     Address, Organization, MedicalStaff
 )
@@ -419,3 +420,121 @@ class UserCheckLoginTestCase(TestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class MedicalSatffTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.login_url = reverse("login")
+        self.logout_url = reverse("logout")
+        self.signup_url = reverse("user-list")
+        self.org_name = 'Avenger'
+        self.med_staff_name = 'John Doe'
+        self.data = {
+            'email': 'email.email1@gmail.com',
+            'password': 'shititit',
+            'user_type': 'OR',
+            'contact_detail': 'some@email.com',
+            'address': {
+                'address': 'Some Address or Shit',
+                'pincode': '39458',
+                'country': 'US',
+            },
+            'organization': {    
+                'name': 'Avenger',
+                'description': 'I am Iron Man !',
+            },
+            'medical_staff' : {
+                'uuid': uuid4(),
+                'name': 'John Doe',
+                'role': 'something something',
+                'speciality': 'jack squat',
+            }
+        }
+
+    def get_user(self):
+        return User.objects.get(email=self.data['email'])
+
+    def is_user_created(self):
+        return User.objects.filter(email=self.data['email']).exists()
+
+    def is_organization_created(self):
+        return Organization.objects.filter(
+            name=self.org_name
+        ).exists()
+
+    def is_medical_staff_created(self):
+        return MedicalStaff.objects.filter(
+            name=self.med_staff_name
+        ).exists()
+
+    def create_user(self):
+        data = dict(self.data)
+        data['address'] = Address.objects.create(**data['address'])
+        data['organization'] = Organization.objects.create(
+            **data['organization']
+        )
+        data['medical_staff'] = MedicalStaff.objects.create(
+            organization=data['organization'], **data['medical_staff']
+        )
+        return User.objects.create_user(**data)
+
+    def test_medical_staff_valid_signup(self):
+        response = self.client.post(self.signup_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = self.get_user()
+        self.assertTrue(user.is_authenticated and user.is_active)
+
+    def test_medical_staff_creation_valid_signup(self):
+        response = self.client.post(self.signup_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = self.get_user()
+        self.assertEqual(user.organization.name, self.org_name)
+        self.assertTrue(self.is_organization_created())
+
+    def test_medical_staff_creation_invalid_signup(self):
+        # missing `user_type` field
+        data = dict(self.data)
+        data.pop('user_type')
+        response = self.client.post(self.signup_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(self.is_user_created())
+        self.assertFalse(self.is_organization_created())
+
+    def test_user_creation_invalid_organization(self):
+        # missing `name` field from organization
+        data = dict(self.data)
+        data['organization'].pop('name')
+        response = self.client.post(self.signup_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(self.is_user_created())
+        self.assertFalse(self.is_organization_created())
+
+    def test_user_creation_invalid_medical_staff(self):
+        # missing `name` field from medical staff
+        data = dict(self.data)
+        data['medical_staff'].pop('name')
+        response = self.client.post(self.signup_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(self.is_user_created())
+        self.assertFalse(self.is_medical_staff_created())
+
+    def test_organization_exist_login(self):
+        self.create_user()
+        self.client.login(
+            username=self.data['email'], password=self.data['password']
+        )
+        user = self.get_user()
+        self.assertEqual(
+            user.organization.name, self.data['organization']['name']
+        )
+
+    def test_medical_staff_exist_login(self):
+        self.create_user()
+        self.client.login(
+            username=self.data['email'], password=self.data['password']
+        )
+        user = self.get_user()
+        self.assertEqual(
+            user.medical_staff.name, self.data['medical_staff']['name']
+        )
