@@ -20,5 +20,5 @@ class MedicalStaff(models.Model):
 
     def __str__(self):
         return "< ({}) Medical Staff of {}>".format(
-            self.name, self.organization.organization_name
+            self.name, str(self.organization),
         )

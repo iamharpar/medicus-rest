@@ -12,4 +12,8 @@ class Organization(models.Model):
     )
 
     def __str__(self):
-        return "< ({}) organization>".format(self.name)
+        if hasattr(self, 'to_organization'):
+            return "< ({}) organization -- branch {} >".format(
+                self.name, self.to_organization.address.pincode,
+            )
+        return "< ({}) organization >".format(self.name)
