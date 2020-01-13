@@ -13,7 +13,7 @@ from medical_staff.models import MedicalStaff
 User = get_user_model()
 
 
-class OrganizationSignupTestCase(TestCase):
+class UserSignupTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.second_client = APIClient()
