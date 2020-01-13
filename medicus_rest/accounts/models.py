@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractUser
 from rest_framework.authtoken.models import Token
 from django.utils.translation import ugettext_lazy as _
 
-from uuid import uuid4
 from .managers import CustomUserManager
 
 
@@ -18,25 +17,6 @@ class Address(models.Model):
         )
 
 
-class MedicalStaff(models.Model):
-    uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
-    name = models.CharField(_('medical staff name'), max_length=50)
-    is_verified = models.BooleanField(default=False)
-    organization = models.OneToOneField(
-        'organization.Organization', on_delete=models.DO_NOTHING
-    )
-    role = models.CharField(_('role in organization'), max_length=30)
-    speciality = models.CharField(
-        _('medical speciality, if any'), max_length=30, blank=True,
-        default='',
-    )
-
-    def __str__(self):
-        return "< ({}) Medical Staff of {}>".format(
-            self.name, self.organization.organization_name
-        )
-
-
 class User(AbstractUser):
     username, first_name, last_name = None, None, None  # exclude fields
     email = models.EmailField(_('email address'), unique=True)
@@ -47,7 +27,8 @@ class User(AbstractUser):
         null=True, default=None,
     )
     medical_staff = models.OneToOneField(
-        'MedicalStaff', on_delete=models.DO_NOTHING, null=True, default=None,
+        'medical_staff.MedicalStaff', on_delete=models.DO_NOTHING, 
+        null=True, default=None,
     )
 
     class UserType(models.TextChoices):

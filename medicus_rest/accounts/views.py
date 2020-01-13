@@ -2,13 +2,12 @@ from datetime import datetime
 
 from djoser.views import TokenCreateView, TokenDestroyView
 from djoser.views import UserViewSet as DjoserUserViewSet
-from rest_framework import generics, status
+from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .serializers import (MedicalStaffSerializer, OrganizationSerializer,
-                          UserSerializer)
+from .serializers import UserSerializer
 
 
 @api_view(['GET'])
