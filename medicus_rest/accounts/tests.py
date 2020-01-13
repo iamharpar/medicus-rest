@@ -6,8 +6,10 @@ from django.urls import reverse
 from rest_framework import status
 
 from .models import (
-    Address, Organization, MedicalStaff
+    Address, MedicalStaff
 )
+
+from organization.models import Organization
 
 User = get_user_model()
 

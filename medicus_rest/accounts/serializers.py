@@ -1,6 +1,8 @@
 from rest_framework import serializers
+from organization.serializers import OrganizationSerializer
+from organization.models import Organization
 from .models import (
-    User, Address, MedicalStaff, Organization
+    User, Address, MedicalStaff
 )
 
 
@@ -8,16 +10,6 @@ class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = '__all__'
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        return dict(data)
-
-
-class OrganizationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Organization
-        fields = ['name', 'description', ]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
