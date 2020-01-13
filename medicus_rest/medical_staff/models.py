@@ -9,7 +9,7 @@ class MedicalStaff(models.Model):
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     name = models.CharField(_('medical staff name'), max_length=50)
     is_verified = models.BooleanField(default=False)
-    organization = models.OneToOneField(
+    organization = models.ForeignKey(
         'organization.Organization', on_delete=models.DO_NOTHING
     )
     role = models.CharField(_('role in organization'), max_length=30)

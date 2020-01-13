@@ -10,3 +10,6 @@ class OrganizationSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         return dict(data)
+
+    def create(self, validated_data):
+        return super().create(validated_data)
