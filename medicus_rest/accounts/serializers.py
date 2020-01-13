@@ -9,11 +9,19 @@ class AddressSerializer(serializers.ModelSerializer):
         model = Address
         fields = '__all__'
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return dict(data)
+
 
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = ['name', 'description', ]
+
+    def to_representation(self, instance):
+        data = super(OrganizationSerializer, self).to_representation(instance)
+        return dict(data)
 
 
 class MedicalStaffSerializer(serializers.ModelSerializer):
@@ -22,6 +30,10 @@ class MedicalStaffSerializer(serializers.ModelSerializer):
     class Meta:
         model = MedicalStaff
         fields = ['name', 'organization', 'role', 'speciality', ]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return dict(data)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -43,6 +55,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_auth_token(self, user):
         return user.get_auth_token()
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return dict(data)
 
     def create(self, validated_data):
         address_data = validated_data.pop('address')

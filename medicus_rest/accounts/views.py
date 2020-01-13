@@ -1,15 +1,15 @@
+from datetime import datetime
+
 from djoser.views import TokenCreateView, TokenDestroyView
 from djoser.views import UserViewSet as DjoserUserViewSet
-from rest_framework import status
+from rest_framework import generics, status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .serializers import (
-    UserSerializer,
-    OrganizationSerializer, MedicalStaffSerializer,
-)
-from datetime import datetime
+from .models import Organization
+from .serializers import (MedicalStaffSerializer, OrganizationSerializer,
+                          UserSerializer)
 
 
 @api_view(['GET'])
@@ -80,6 +80,11 @@ class UserLogout(TokenDestroyView):
         if response.status_code == status.HTTP_204_NO_CONTENT:
             response.delete_cookie(key='auth_token')
         return response
+
+
+class OrganizationModeAPIView(generics.ListAPIView):
+    queryset = Organization.objects.all()
+    serializer_class = OrganizationSerializer
 
 
 @api_view(['POST'])

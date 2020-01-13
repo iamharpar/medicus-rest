@@ -122,6 +122,7 @@ class OrganizationTestCase(TestCase):
         self.login_url = reverse("login")
         self.logout_url = reverse("logout")
         self.signup_url = reverse("user-list")
+        self.org_url = reverse('organization')
         self.org_name = 'Avenger'
         self.data = {
             'email': 'email.email1@gmail.com',
@@ -198,6 +199,24 @@ class OrganizationTestCase(TestCase):
         self.assertEqual(
             user.organization.name, self.data['organization']['name']
         )
+
+    def test_organization_creation_existing_organization(self):
+        self.create_user()
+        data = dict(self.data)
+        data['email'] = 'some.other_email@email.com'
+        response = self.client.post(self.signup_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_organization_list(self):
+        org = Organization.objects.bulk_create([
+            Organization(
+                name=self.org_name + str(i),
+                description='Same Description')
+            for i in range(5)
+        ])
+        response = self.client.get(self.org_url)
+        self.assertEqual(len(response.data), len(org))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 class UserLoginTestCase(TestCase):

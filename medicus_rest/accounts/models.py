@@ -20,7 +20,7 @@ class Address(models.Model):
 
 class Organization(models.Model):
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
-    name = models.CharField(_('organization name'), max_length=30)
+    name = models.CharField(_('organization name'), max_length=30, unique=True)
     description = models.TextField(
         _('proper description of organization'),
     )
@@ -32,6 +32,7 @@ class Organization(models.Model):
 class MedicalStaff(models.Model):
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     name = models.CharField(_('medical staff name'), max_length=50)
+    is_verified = models.BooleanField(default=False)
     organization = models.OneToOneField(
         'organization', on_delete=models.DO_NOTHING
     )
