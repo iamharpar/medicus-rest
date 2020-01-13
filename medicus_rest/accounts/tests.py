@@ -8,7 +8,7 @@ from rest_framework import status
 from .models import Address
 
 from organization.models import Organization
-#from medical_staff.models import MedicalStaff
+from medical_staff.models import MedicalStaff
 
 User = get_user_model()
 
@@ -448,7 +448,7 @@ class MedicalSatffTestCase(TestCase):
         self.logout_url = reverse("logout")
         self.signup_url = reverse("user-list")
         self.org_name = 'Avenger'
-        self.uuid_object = uuid4()
+        # self.uuid_object = uuid4()
         self.med_staff_name = 'John Doe'
         self.data = {
             'email': 'email.email1@gmail.com',

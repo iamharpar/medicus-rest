@@ -3,6 +3,7 @@ from organization.models import Organization
 from organization.serializers import OrganizationSerializer
 from medical_staff.models import MedicalStaff
 from medical_staff.serializers import MedicalStaffSerializer
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import User, Address
 
@@ -42,29 +43,33 @@ class UserSerializer(serializers.ModelSerializer):
         return dict(data)
 
     def create(self, validated_data):
-        address_data = validated_data.pop('address')
-        if 'organization' in validated_data:
-            validated_data['organization'] = Organization.objects.create(
-                **validated_data['organization']
+            print("UserSerializer create")
+            # a medical_staff object takes in
+            # a organization object as a result
+            # organization conditonal statements
+            # are transfered before the medical_staff
+            if 'medical_staff' in validated_data:
+                validated_data['medical_staff'] = MedicalStaff.objects.create(
+                    **validated_data['medical_staff']
+                )
+
+            address_data = validated_data.pop('address')
+            org_object = None
+            if 'organization' in validated_data:
+                print(validated_data['organization']['name'])
+                try:
+                    org_object = Organization.objects.get(
+                        name=validated_data['organization']['name']
+                    )
+                    validated_data['organization'] = org_object
+                except ObjectDoesNotExist:
+                    validated_data['organization'] = Organization.objects.create(
+                        **validated_data['organization']
+                    )
+
+            address = Address.objects.create(**address_data)
+            user = User.objects.create(
+                address=address, **validated_data
             )
 
-        # a medical_staff object takes in
-        # a organization object as a result
-        # organization conditonal statements
-        # are transfered before the medical_staff
-        if 'medical_staff' in validated_data:
-            org_object = validated_data['organization']
-            if org_object.name == validated_data['medical_staff']['organization']:
-                # used del because dict.pop() cannot be used to 
-                # delete nested dicts
-                del validated_data['medical_staff']['organization']
-            validated_data['medical_staff'] = MedicalStaff.objects.create(
-                organization=org_object, **validated_data['medical_staff']
-            )
-
-        address = Address.objects.create(**address_data)
-        user = User.objects.create(
-            address=address, **validated_data
-        )
-
-        return user
+            return user

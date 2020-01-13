@@ -10,7 +10,7 @@ class MedicalStaff(models.Model):
     name = models.CharField(_('medical staff name'), max_length=50)
     is_verified = models.BooleanField(default=False)
     organization = models.OneToOneField(
-        'organization.Organization', on_delete=models.DO_NOTHING
+        'organization.Organization', on_delete=models.DO_NOTHING, unique=False
     )
     role = models.CharField(_('role in organization'), max_length=30)
     speciality = models.CharField(

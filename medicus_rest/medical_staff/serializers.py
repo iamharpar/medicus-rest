@@ -4,10 +4,10 @@ from .models import MedicalStaff
 
 
 class MedicalStaffSerializer(serializers.ModelSerializer):
-    organization = serializers.CharField()
 
     class Meta:
         model = MedicalStaff
+        organization = serializers.CharField()
         fields = ['name', 'organization', 'role', 'speciality', ]
 
     def to_representation(self, instance):
