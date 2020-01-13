@@ -46,14 +46,19 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         address_data = validated_data.pop('address')
-        if 'medical_staff' in validated_data:
-            validated_data['medical_staff'] = MedicalStaff.objects.create(
-                **validated_data['medical_staff']
-            )
         if 'organization' in validated_data:
             validated_data['organization'] = Organization.objects.create(
                 **validated_data['organization']
             )
+
+        if 'medical_staff' in validated_data:
+            org_object = validated_data['organization']
+            if org_object.name == validated_data['medical_staff']['organization']:
+                del validated_data['medical_staff']['organization']
+            validated_data['medical_staff'] = MedicalStaff.objects.create(
+                organization=org_object, **validated_data['medical_staff']
+            )
+
         address = Address.objects.create(**address_data)
         user = User.objects.create(
             address=address, **validated_data

@@ -429,6 +429,7 @@ class MedicalSatffTestCase(TestCase):
         self.logout_url = reverse("logout")
         self.signup_url = reverse("user-list")
         self.org_name = 'Avenger'
+        self.uuid_object = uuid4()
         self.med_staff_name = 'John Doe'
         self.data = {
             'email': 'email.email1@gmail.com',
@@ -445,8 +446,12 @@ class MedicalSatffTestCase(TestCase):
                 'description': 'I am Iron Man !',
             },
             'medical_staff' : {
-                'uuid': uuid4(),
+                # 'uuid': self.uuid_object,
                 'name': 'John Doe',
+                'organization': {
+                    'name': 'Avenger',
+                    'description': 'I am Iron Man !',
+                },
                 'role': 'something something',
                 'speciality': 'jack squat',
             }
@@ -474,8 +479,9 @@ class MedicalSatffTestCase(TestCase):
         data['organization'] = Organization.objects.create(
             **data['organization']
         )
+        data['medical_staff']['organization'] = data['organization']
         data['medical_staff'] = MedicalStaff.objects.create(
-            organization=data['organization'], **data['medical_staff']
+            **data['medical_staff']
         )
         return User.objects.create_user(**data)
 
