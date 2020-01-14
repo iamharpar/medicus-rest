@@ -368,15 +368,11 @@ class MedicalStaffTestCase(TestCase):
         ).exists())
 
     def test_medical_staff_response_fields_valid(self):
+        self.create_organization()
         response = self.client.post(self.signup_url, self.data, format='json')
-        print(response.data)
-
         for key in self.valid_keys:
             if key not in response.data:
-                self.assertEquals(
-                    response.status_code, status.HTTP_400_BAD_REQUEST, 
-                    response.data
-                )
+                self.assertFalse(response.data)
 
     def test_medical_staff_valid_signup(self):
         self.create_organization()
