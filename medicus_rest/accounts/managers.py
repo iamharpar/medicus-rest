@@ -11,10 +11,11 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('email must be set')
 
         email = extra_fields.pop('email')  # remove address in case it's passed
+        password =  extra_fields.pop('password')
         email = self.normalize_email(email)
         extra_fields.setdefault('user_type', None)
         user = self.model(email=email, **extra_fields)
-        user.set_password(extra_fields['password'])
+        user.set_password(password)
         user.save(using=self._db)
         return user
 
