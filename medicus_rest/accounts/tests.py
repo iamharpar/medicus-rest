@@ -89,6 +89,11 @@ class OrganizationTestCase(TestCase):
         self.logout_url = reverse("logout")
         self.signup_url = reverse("user-list")
         self.org_url = reverse('organization')
+        self.valid_keys = (
+            'email', 'user_type', 'url', 'contact_detail', 
+            'address', 'organization', 'medical_staff',
+            'auth_token'
+        )
         self.org_name = 'Avenger'
         self.data = {
             'email': 'email.email1@gmail.com',
@@ -133,7 +138,7 @@ class OrganizationTestCase(TestCase):
     def test_organization_response_fields_valid(self):
         response = self.client.post(self.signup_url, self.data, format='json')
 
-        for key in self.data.keys():
+        for key in self.valid_keys:
             if key not in response.data:
                 self.assertEquals(
                     response.status_code, status.HTTP_400_BAD_REQUEST, response.data
@@ -484,6 +489,11 @@ class MedicalStaffTestCase(TestCase):
             'name': 'Avenger',
             'description': 'I am Iron Man !',
         }
+        self.valid_keys = (
+            'email', 'user_type', 'url', 'contact_detail', 
+            'address', 'organization', 'medical_staff',
+            'auth_token'
+        )
         self.data = {
             'email': 'email.email1@gmail.com',
             'password': 'shititit',
@@ -508,6 +518,26 @@ class MedicalStaffTestCase(TestCase):
     def is_user_created(self):
         return User.objects.filter(email=self.data['email']).exists()
 
+    @staticmethod
+    def get_user_data():
+        return {
+            'email': 'email.email1@gmail.com',
+            'password': 'shititit',
+            'user_type': 'OR',
+            'contact_detail': 'some@email.com',
+            'address': {
+                'address': 'Some Address or Shit',
+                'pincode': '39458',
+                'country': 'US',
+            },
+            'medical_staff': {
+                'name': 'John Doe',
+                'organization': 'Avenger',
+                'role': 'something something',
+                'speciality': 'jack squat',
+            }
+        }
+
     def is_organization_created(self):
         return Organization.objects.filter(
             name=self.org_name
@@ -522,13 +552,14 @@ class MedicalStaffTestCase(TestCase):
         return Organization.objects.create(**self.org_data)
 
     def create_user(self):
-        data = dict(self.data)
+        data = MedicalStaffTestCase.get_user_data()
         data['address'] = Address.objects.create(**data['address'])
         org = self.create_organization()
         data['medical_staff'].update({'organization': org})
-        data['medical_staff'] = MedicalStaff.objects.create(
+        medical_staff = MedicalStaff.objects.create(
             **data['medical_staff']
         )
+        data.update({'medical_staff': medical_staff})
         return User.objects.create_user(**data)
 
     def test_is_medical_staff_created(self):
@@ -541,10 +572,11 @@ class MedicalStaffTestCase(TestCase):
     def test_medical_staff_response_fields_valid(self):
         response = self.client.post(self.signup_url, self.data, format='json')
 
-        for key in self.data.keys():
+        for key in self.valid_keys:
             if key not in response.data:
                 self.assertEquals(
-                    response.status_code, status.HTTP_400_BAD_REQUEST, response.data
+                    response.status_code, status.HTTP_400_BAD_REQUEST, 
+                    response.data
                 )
 
     def test_medical_staff_valid_signup(self):
@@ -561,7 +593,7 @@ class MedicalStaffTestCase(TestCase):
 
     def test_medical_staff_creation_invalid_signup(self):
         # missing `user_type` field
-        data = dict(self.data)
+        data = MedicalStaffTestCase.get_user_data()
         data.pop('user_type')
         response = self.client.post(self.signup_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -574,7 +606,7 @@ class MedicalStaffTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_medical_staff_signup_without_required_fields(self):
-        data = dict(self.data)
+        data = MedicalStaffTestCase.get_user_data()
         data['medical_staff'].pop('name')  # `medical_staff.name` missing
         response = self.client.post(self.signup_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -582,14 +614,14 @@ class MedicalStaffTestCase(TestCase):
         self.assertFalse(self.is_medical_staff_created())
 
     def test_medical_staff_signup_without_medical_staff(self):
-        data = dict(self.data)
+        data = MedicalStaffTestCase.get_user_data()
         data.pop('medical_staff')  # removed medical_staff
         response = self.client.post(self.signup_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(self.is_user_created())
 
     def test_medical_staff_signup_without_address(self):
-        data = dict(self.data)
+        data = MedicalStaffTestCase.get_user_data()
         data.pop('address')  # removed address
         response = self.client.post(self.signup_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -608,14 +640,13 @@ class MedicalStaffTestCase(TestCase):
     def test_medical_staff_creation_existing_medical_staff(self):
         # JSON SERIALIZER ERROR HERE
         self.create_user()
-        data = dict(self.data)
+        data = MedicalStaffTestCase.get_user_data()
         data['email'] = 'some.other_email@email.com'
         response = self.client.post(self.signup_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_signup_existing_user(self):
-        # JSON SERIALIZER ERROR HERE
-        data = dict(self.data)
+        data = MedicalStaffTestCase.get_user_data()
         self.create_user()
         response = self.client.post(self.signup_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -628,7 +659,7 @@ class MedicalStaffTestCase(TestCase):
         self.assertTrue(is_logged_in)
 
     def test_signup_invalid(self):
-        data = dict(self.data)
+        data = MedicalStaffTestCase.get_user_data()
         data['address'].pop('pincode')  # removed pincode from address
         response = self.client.post(self.signup_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -652,10 +683,9 @@ class MedicalStaffTestCase(TestCase):
         self.assertTrue(response.data['auth_token'])
 
     def test_signup_authtoken_creation_invalid(self):
-        data = dict(self.data)
+        data = MedicalStaffTestCase.get_user_data()
         data['address'].pop('address')  # invalid address format
         response = self.client.post(self.signup_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         token = Token.objects.filter(user__email=data['email'])
         self.assertFalse(len(token))
-
