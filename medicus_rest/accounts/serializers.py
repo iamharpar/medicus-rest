@@ -26,8 +26,9 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'url', 'email', 'address', 'medical_staff', 'user_type',
-            'auth_token', 'contact_detail', 'organization',
+            'auth_token', 'contact_detail', 'organization', 'password',
         ]
+        #read_only_fields = ['password']
         extra_kwargs = {
             'contact_detail': {'required': True},
             'user_type':  {'required': True},
@@ -38,6 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
+        data.pop('password')
         return dict(data)
 
     def get_user_type_serializer_instance(self, validated_data):
