@@ -463,6 +463,7 @@ class MedicalStaffTestCase(TestCase):
         self.assertFalse(self.is_user_created())
 
     def test_signup_set_cookie(self):
+        self.create_organization()
         data = MedicalStaffTestCase.get_user_data()
         response = self.client.post(self.signup_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -477,6 +478,7 @@ class MedicalStaffTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_signup_authtoken_creation(self):
+        self.create_organization()
         response = self.client.post(self.signup_url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(response.data['auth_token'])
