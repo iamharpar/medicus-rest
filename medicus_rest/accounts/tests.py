@@ -155,14 +155,14 @@ class OrganizationTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_organization_response_fields_valid(self):
-        response = self.client.post(self.signup_url, self.data, format='json')
-
+        data = dict(self.data)
+        # uncomment the below line to test 
+        # assertFalse's execution
+        # data.pop('organization')
+        response = self.client.post(self.signup_url, data, format='json')
         for key in self.valid_keys:
             if key not in response.data:
-                self.assertEquals(
-                    response.status_code, status.HTTP_400_BAD_REQUEST, 
-                    response.data
-                )
+                self.assertFalse(response.data)
 
     def test_organization_valid_signup(self):
         response = self.client.post(self.signup_url, self.data, format='json')
