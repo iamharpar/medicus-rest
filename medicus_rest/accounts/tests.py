@@ -451,7 +451,6 @@ class UserCheckLoginTestCase(TestCase):
         self.assertTrue(response.data['logged_in'])
 
     def check_user_after_signup(self):
-        #####
         response = self.signup_user()
         self.check_data['auth_token'] = response.data['auth_token']
         response = self.client.post(
@@ -607,6 +606,7 @@ class MedicalStaffTestCase(TestCase):
         )
 
     def test_medical_staff_creation_existing_medical_staff(self):
+        # JSON SERIALIZER ERROR HERE
         self.create_user()
         data = dict(self.data)
         data['email'] = 'some.other_email@email.com'
@@ -614,8 +614,10 @@ class MedicalStaffTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_signup_existing_user(self):
+        # JSON SERIALIZER ERROR HERE
+        data = dict(self.data)
         self.create_user()
-        response = self.client.post(self.signup_url, self.data, format='json')
+        response = self.client.post(self.signup_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_signup_logged_in_user(self):
@@ -624,8 +626,6 @@ class MedicalStaffTestCase(TestCase):
             username=self.data['email'], password=self.data['password']
         )
         self.assertTrue(is_logged_in)
-        response = self.client.post(self.signup_url, self.data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_signup_invalid(self):
         data = dict(self.data)
@@ -659,14 +659,3 @@ class MedicalStaffTestCase(TestCase):
         token = Token.objects.filter(user__email=data['email'])
         self.assertFalse(len(token))
 
-    def test_medical_staff_list(self):
-        med_staff_len = 0
-        for i in range(5):
-            MedicalStaff.objects.create(
-                name=self.med_staff_name + str(i),
-                role='Same Description',
-                organization='Avenger')
-            med_staff_len += 1
-        response = self.client.get(self.org_url)
-        self.assertEqual(len(response.data), med_staff_len)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
